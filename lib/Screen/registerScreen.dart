@@ -1,3 +1,4 @@
+import 'package:appenglish/Module/DataBaseHelper.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -64,6 +65,8 @@ class _registerScreen extends State<registerScreen>{
 
           db.collection("users").doc(account.user!.uid).collection("yourVocabularry");
           db.collection("users").doc(account.user!.uid).collection("appVocabulary");
+
+          DataBaseHelper().insertDataAuthentical(_email);
 
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(

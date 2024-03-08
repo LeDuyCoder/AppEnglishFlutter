@@ -7,7 +7,8 @@ enum Typeword {
   determiner,
   preposition,
   conjunction,
-  interjection
+  interjection,
+  undefined
 }
 
 class Word{

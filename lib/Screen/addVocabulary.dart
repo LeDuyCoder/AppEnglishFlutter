@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:appenglish/Module/DataBaseHelper.dart';
 import 'package:appenglish/Module/meanWord.dart';
 import 'package:appenglish/Module/word.dart';
 import 'package:appenglish/Widgets/bodyDialog.dart';
@@ -9,6 +10,7 @@ import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 
@@ -24,7 +26,7 @@ class addVocabulary extends StatefulWidget{
 
   var linkImages = null;
   var name_vocabulary = null;
-  var listWord = <Word>[];
+  List<Word> listWord = [];
   var wordNew = "";
   var isLoading = false;
   var amount = 0;
@@ -78,17 +80,32 @@ class _addVocabulary extends State<addVocabulary>{
   }
 
   void addData(data, word){
+
+    print(word);
     widget.listWord.add(
-        Word(
+
+        ((data[0] as Map)["phonetics"] as List).length <= 2 ? Word(
             word: word,
-            type: getEnumValue(hanldTypeword((data[0] as Map)["meaning"])!.type),
+            type: hanldTypeword((data[0] as Map)["meaning"]) == null ? Typeword.undefined : getEnumValue(hanldTypeword((data[0] as Map)["meaning"])!.type),
+            linkUK: (data[0] as Map)["phonetics"][0]["audio"],
+            linkUS: ((data[0] as Map)["phonetics"] as List).length == 2 ? (data[0] as Map)["phonetics"][1]["audio"] : (data[0] as Map)["phonetics"][0]["audio"],
+            phonicUK: (data[0] as Map)["phonetics"][0]["text"],
+            phonicUS: ((data[0] as Map)["phonetics"] as List).length == 2 ? (data[0] as Map)["phonetics"][1]["text"] : (data[0] as Map)["phonetics"][0]["text"],
+            means: hanldTypeword((data[0] as Map)["meaning"]) != null ? hanldTypeword((data[0] as Map)["meaning"])!.definition : "",
+            example: hanldTypeword((data[0] as Map)["meaning"]) != null ? hanldTypeword((data[0] as Map)["meaning"])!.example : ""
+        ):Word(
+            word: word,
+            type: hanldTypeword((data[0] as Map)["meaning"]) == null ? Typeword.undefined : getEnumValue(hanldTypeword((data[0] as Map)["meaning"])!.type),
             linkUK: (data[0] as Map)["phonetics"][1]["audio"],
             linkUS: (data[0] as Map)["phonetics"][2]["audio"],
             phonicUK: (data[0] as Map)["phonetics"][1]["text"],
             phonicUS: (data[0] as Map)["phonetics"][2]["text"],
-            means: hanldTypeword((data[0] as Map)["meaning"])!.definition,
-            example: hanldTypeword((data[0] as Map)["meaning"])!.example)
+        means: hanldTypeword((data[0] as Map)["meaning"]) != null ? hanldTypeword((data[0] as Map)["meaning"])!.definition : "",
+        example: hanldTypeword((data[0] as Map)["meaning"]) != null ? hanldTypeword((data[0] as Map)["meaning"])!.example : ""
+        )
     );
+
+    print(widget.listWord.length);
   }
 
    Future<statusAddVoca> CallDialogError(_formMini, word) async {
@@ -143,7 +160,7 @@ class _addVocabulary extends State<addVocabulary>{
     try {
       final response = await http.get(Uri.parse('https://api.dictionaryapi.dev/api/v1/entries/en/$word'));
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        var data = json.decode(response.body);
         addData(data, word);
         return true;
       } else {
@@ -178,6 +195,10 @@ class _addVocabulary extends State<addVocabulary>{
 
 
     if (allCallsSuccessful) {
+      print(widget.listWord.length);
+
+      await DataBaseHelper().insetDataVocabulary(widget.listWord, widget.name_vocabulary);
+
       AwesomeDialog(
         context: context,
         dialogType: DialogType.success,

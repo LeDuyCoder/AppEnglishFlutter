@@ -59,7 +59,8 @@ class _registerScreen extends State<registerScreen>{
               "exp": 0,
               "nextexp": 216000,
               "rank": 0,
-              "vip": false
+              "vip": false,
+              "amount_vocabulary_list": 0
             }
           );
 

@@ -48,6 +48,7 @@ dependencies:
   awesome_dialog: ^3.2.0
   rive: ^0.12.4
   sqflite: ^2.3.2
+  firebase_storage: ^11.6.9
 
 dev_dependencies:
   flutter_test:

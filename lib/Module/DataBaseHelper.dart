@@ -62,6 +62,26 @@ class DataBaseHelper {
     db.close();
   }
 
+  Future<bool> hasSet(tableName, Map<String, String> arraycondition) async {
+    final db = await initDB();
+    String conditions = '';
+    var amount = 1;
+    arraycondition.forEach((key, value) {
+      if(amount == arraycondition.length){
+        conditions += "$key = \'$value\' ";
+      }else {
+        conditions += '$key = \'$value\' AND ';
+      }
+      amount++;
+    });
+    List<Map<String, dynamic>> result = await db.query(tableName, where: conditions);
+    if(result.isEmpty){
+      return false;
+    }else{
+      return true;
+    }
+  }
+
 
   // Future<void> insetListBook(List<Book> books) async {
   //   final db = await initDB();

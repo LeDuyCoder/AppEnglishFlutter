@@ -5,14 +5,19 @@ import 'dart:io';
 import 'package:appenglish/Module/DataBaseHelper.dart';
 import 'package:appenglish/Module/meanWord.dart';
 import 'package:appenglish/Module/word.dart';
-import 'package:appenglish/Widgets/bodyDialog.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:hive/hive.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
+import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart' as path_provider;
+
 
 enum statusAddVoca  {
   Waiting,
@@ -24,8 +29,13 @@ class addVocabulary extends StatefulWidget{
   @override
   State<StatefulWidget> createState() => _addVocabulary();
 
+  final authentical = FirebaseAuth.instance;
+  final db = DataBaseHelper();
+  var localStorehive = null;
+
   var linkImages = null;
   var name_vocabulary = null;
+  var StringListWord = "";
   List<Word> listWord = [];
   var wordNew = "";
   var isLoading = false;
@@ -34,7 +44,12 @@ class addVocabulary extends StatefulWidget{
 
 class _addVocabulary extends State<addVocabulary>{
   final _form = GlobalKey<FormState>();
+  final storage = FirebaseStorage.instance;
+  final dbStore = FirebaseFirestore.instance;
+
   Completer<bool> completer = Completer<bool>();
+
+  @override
 
   void updateImages() async {
     try {
@@ -63,7 +78,8 @@ class _addVocabulary extends State<addVocabulary>{
       }
     }
 
-    return null;
+    var test = meanWord(definition: ((value[(value.keys).first] as List)[0] as Map)["definition"], example: "", type: value.keys.first);
+    return test;
   }
 
   bool isInEnum(String value) {
@@ -83,10 +99,9 @@ class _addVocabulary extends State<addVocabulary>{
 
     print(word);
     widget.listWord.add(
-
         ((data[0] as Map)["phonetics"] as List).length <= 2 ? Word(
             word: word,
-            type: hanldTypeword((data[0] as Map)["meaning"]) == null ? Typeword.undefined : getEnumValue(hanldTypeword((data[0] as Map)["meaning"])!.type),
+            type: getEnumValue(hanldTypeword((data[0] as Map)["meaning"])!.type),
             linkUK: (data[0] as Map)["phonetics"][0]["audio"],
             linkUS: ((data[0] as Map)["phonetics"] as List).length == 2 ? (data[0] as Map)["phonetics"][1]["audio"] : (data[0] as Map)["phonetics"][0]["audio"],
             phonicUK: (data[0] as Map)["phonetics"][0]["text"],
@@ -95,17 +110,33 @@ class _addVocabulary extends State<addVocabulary>{
             example: hanldTypeword((data[0] as Map)["meaning"]) != null ? hanldTypeword((data[0] as Map)["meaning"])!.example : ""
         ):Word(
             word: word,
-            type: hanldTypeword((data[0] as Map)["meaning"]) == null ? Typeword.undefined : getEnumValue(hanldTypeword((data[0] as Map)["meaning"])!.type),
+            type: getEnumValue(hanldTypeword((data[0] as Map)["meaning"])!.type),
             linkUK: (data[0] as Map)["phonetics"][1]["audio"],
             linkUS: (data[0] as Map)["phonetics"][2]["audio"],
             phonicUK: (data[0] as Map)["phonetics"][1]["text"],
             phonicUS: (data[0] as Map)["phonetics"][2]["text"],
-        means: hanldTypeword((data[0] as Map)["meaning"]) != null ? hanldTypeword((data[0] as Map)["meaning"])!.definition : "",
-        example: hanldTypeword((data[0] as Map)["meaning"]) != null ? hanldTypeword((data[0] as Map)["meaning"])!.example : ""
+            means: hanldTypeword((data[0] as Map)["meaning"]) != null ? hanldTypeword((data[0] as Map)["meaning"])!.definition : "",
+            example: hanldTypeword((data[0] as Map)["meaning"]) != null ? hanldTypeword((data[0] as Map)["meaning"])!.example : ""
         )
     );
+  }
 
-    print(widget.listWord.length);
+  void updateVocabularyToFirebase(){
+    widget.listWord.forEach((element) {
+      dbStore.collection("users").doc(widget.authentical.currentUser!.uid).collection("VocabularyData").doc(widget.name_vocabulary).collection("listVocabulary").doc(element.word).set(
+          {
+            "word": element.word,
+            "type": element.type.name,
+            "linkUS": element.linkUS,
+            "linkUK": element.linkUK,
+            "phonicUS": element.phonicUS,
+            "phonicUK": element.phonicUK,
+            "mean": element.means,
+            "example": element.example,
+            "image": widget.linkImages
+          }
+      );
+    });
   }
 
    Future<statusAddVoca> CallDialogError(_formMini, word) async {
@@ -197,17 +228,32 @@ class _addVocabulary extends State<addVocabulary>{
     if (allCallsSuccessful) {
       print(widget.listWord.length);
 
-      await DataBaseHelper().insetDataVocabulary(widget.listWord, widget.name_vocabulary);
+      //await widget.db.insetDataVocabulary(widget.listWord, widget.name_vocabulary);
+      updateVocabularyToFirebase();
+
+      DocumentReference docRef = FirebaseFirestore.instance.collection('users').doc(widget.authentical.currentUser!.uid).collection("dataAccount").doc("data");
+      DocumentSnapshot docSnapshot = await docRef.get();
+      if (docSnapshot.exists) {
+        dynamic fieldValue = docSnapshot.data()!;
+        docRef.update({
+          "amount_vocabulary_list": fieldValue["amount_vocabulary_list"] + 1
+        });
+      } else {
+        print('Tài liệu không tồn tại.');
+      }
+
 
       AwesomeDialog(
+        dismissOnTouchOutside: false,
         context: context,
         dialogType: DialogType.success,
-        animType: AnimType.rightSlide,
+        animType: AnimType.scale,
         title: 'Success',
         btnOkOnPress: () {
           setState(() {
             widget.isLoading = false;
           });
+          Navigator.of(context).pop();
         },
       ).show();
     }
@@ -314,13 +360,13 @@ class _addVocabulary extends State<addVocabulary>{
                                   if(value!.trim().isEmpty){
                                     return "list word of set vocabulary not valid";
                                   }
-                                  hanldWord(value);
+                                  widget.StringListWord = value;
                                 },
                               ),
                             ),
                             SizedBox(height: 50,),
                             ElevatedButton(
-                              onPressed: () {
+                              onPressed: () async {
                                 final isValid = _form.currentState!.validate();
                                 if(isValid){
                                   _form.currentState!.save();
@@ -330,6 +376,29 @@ class _addVocabulary extends State<addVocabulary>{
                                   widget.isLoading = true;
                                 });
 
+                                if((await widget.db.hasSet("VocabularyList", {"tokenUID": widget.authentical.currentUser!.uid, "nameSet": widget.name_vocabulary}))){
+                                  AwesomeDialog(
+                                      dismissOnTouchOutside: false,
+                                      context: context,
+                                      dialogType: DialogType.error,
+                                      animType: AnimType.scale,
+                                      title: 'Name set already exists',
+                                      btnCancelOnPress: () {
+                                        setState(() {
+                                          widget.isLoading = false;
+                                        });
+                                      },
+                                      btnCancelText: "Ok"
+                                ).show();
+                                }else{
+                                  hanldWord(widget.StringListWord);
+                                }
+
+                                if(widget.linkImages != null){
+                                  var images_background = storage.ref().child("VocabularyImage").child("${widget.name_vocabulary}_${widget.authentical.currentUser!.uid}.jpg");
+                                  await images_background.putFile(File(widget.linkImages));
+                                }
+                                
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.blue, // Màu nền của nút

@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:appenglish/Module/DataBaseHelper.dart';
 import 'package:appenglish/Module/meanWord.dart';
 import 'package:appenglish/Module/word.dart';
+import 'package:appenglish/Widgets/tableSet.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -40,6 +41,7 @@ class addVocabulary extends StatefulWidget{
   var wordNew = "";
   var isLoading = false;
   var amount = 0;
+  var linkURLImages = "";
 }
 
 class _addVocabulary extends State<addVocabulary>{
@@ -95,30 +97,74 @@ class _addVocabulary extends State<addVocabulary>{
     throw Exception("Không tìm thấy giá trị enum cho chuỗi '$name'");
   }
 
-  void addData(data, word){
 
+  Future<String> createExampleWord(String word) async {
+    try {
+      final response = await http.get(Uri.parse('https://api.urbandictionary.com/v0/define?term=${word}'));
+      if (response.statusCode == 200) {
+        var data = json.decode(response.body);
+        return ((data["list"] as List)[3] as Map)["example"];
+      } else {
+        return "";
+      }
+    } catch (error) {
+      return "error";
+    }
+  }
+
+  Future<void> addDataPhrasalPerb(data) async {
+    widget.listWord.add(
+        Word(
+            word: ((data["list"] as List)[0] as Map)["word"],
+            type: Typeword.phrasal_verb,
+            linkUK: "",
+            linkUS: "",
+            phonicUK: "",
+            phonicUS: "",
+            means: ((data["list"] as List)[0] as Map)["definition"],
+            example: ((data["list"] as List)[0] as Map)["example"]
+        )
+    );
+  }
+
+  void addData(data, String word) async {
     print(word);
     widget.listWord.add(
         ((data[0] as Map)["phonetics"] as List).length <= 2 ? Word(
             word: word,
-            type: getEnumValue(hanldTypeword((data[0] as Map)["meaning"])!.type),
+            type: getEnumValue(
+                hanldTypeword((data[0] as Map)["meaning"])!.type),
             linkUK: (data[0] as Map)["phonetics"][0]["audio"],
-            linkUS: ((data[0] as Map)["phonetics"] as List).length == 2 ? (data[0] as Map)["phonetics"][1]["audio"] : (data[0] as Map)["phonetics"][0]["audio"],
+            linkUS: ((data[0] as Map)["phonetics"] as List).length == 2
+                ? (data[0] as Map)["phonetics"][1]["audio"]
+                : (data[0] as Map)["phonetics"][0]["audio"],
             phonicUK: (data[0] as Map)["phonetics"][0]["text"],
-            phonicUS: ((data[0] as Map)["phonetics"] as List).length == 2 ? (data[0] as Map)["phonetics"][1]["text"] : (data[0] as Map)["phonetics"][0]["text"],
-            means: hanldTypeword((data[0] as Map)["meaning"]) != null ? hanldTypeword((data[0] as Map)["meaning"])!.definition : "",
-            example: hanldTypeword((data[0] as Map)["meaning"]) != null ? hanldTypeword((data[0] as Map)["meaning"])!.example : ""
-        ):Word(
+            phonicUS: ((data[0] as Map)["phonetics"] as List).length == 2
+                ? (data[0] as Map)["phonetics"][1]["text"]
+                : (data[0] as Map)["phonetics"][0]["text"],
+            means: hanldTypeword((data[0] as Map)["meaning"]) != null
+                ? hanldTypeword((data[0] as Map)["meaning"])!.definition
+                : "",
+            example: hanldTypeword((data[0] as Map)["meaning"]) != null
+                ? hanldTypeword((data[0] as Map)["meaning"])!.example
+                : (await createExampleWord(word))
+        ) : Word(
             word: word,
-            type: getEnumValue(hanldTypeword((data[0] as Map)["meaning"])!.type),
+            type: getEnumValue(
+                hanldTypeword((data[0] as Map)["meaning"])!.type),
             linkUK: (data[0] as Map)["phonetics"][1]["audio"],
             linkUS: (data[0] as Map)["phonetics"][2]["audio"],
             phonicUK: (data[0] as Map)["phonetics"][1]["text"],
             phonicUS: (data[0] as Map)["phonetics"][2]["text"],
-            means: hanldTypeword((data[0] as Map)["meaning"]) != null ? hanldTypeword((data[0] as Map)["meaning"])!.definition : "",
-            example: hanldTypeword((data[0] as Map)["meaning"]) != null ? hanldTypeword((data[0] as Map)["meaning"])!.example : ""
+            means: hanldTypeword((data[0] as Map)["meaning"]) != null
+                ? hanldTypeword((data[0] as Map)["meaning"])!.definition
+                : "",
+            example: hanldTypeword((data[0] as Map)["meaning"]) != null
+                ? hanldTypeword((data[0] as Map)["meaning"])!.example
+                : (await createExampleWord(word))
         )
     );
+
   }
 
   void updateVocabularyToFirebase(){
@@ -133,14 +179,16 @@ class _addVocabulary extends State<addVocabulary>{
             "phonicUK": element.phonicUK,
             "mean": element.means,
             "example": element.example,
-            "image": widget.linkImages
           }
       );
+      dbStore.collection("users").doc(widget.authentical.currentUser!.uid).collection("VocabularyData").doc(widget.name_vocabulary).set({
+        "image": widget.linkURLImages
+      });
     });
   }
 
    Future<statusAddVoca> CallDialogError(_formMini, word) async {
-     Completer<statusAddVoca> completer = Completer<statusAddVoca>();
+    Completer<statusAddVoca> completer = Completer<statusAddVoca>();
     AwesomeDialog(
       context: context,
       dialogType: DialogType.error,
@@ -179,7 +227,15 @@ class _addVocabulary extends State<addVocabulary>{
         final isValid = _formMini.currentState!.validate();
         if (isValid) {
           _formMini.currentState!.save();
-          completer.complete(statusAddVoca.Success);
+
+          if(widget.wordNew != ""){
+            var recall = callAPI(widget.wordNew);
+            if(await recall){
+              completer.complete(statusAddVoca.Success);
+            }else{
+              completer.complete(statusAddVoca.Error);
+            }
+          }
         }
       },
     ).show();
@@ -187,28 +243,77 @@ class _addVocabulary extends State<addVocabulary>{
     return completer.future;
   }
 
-  Future<bool> callAPI(String word) async {
-    try {
-      final response = await http.get(Uri.parse('https://api.dictionaryapi.dev/api/v1/entries/en/$word'));
-      if (response.statusCode == 200) {
-        var data = json.decode(response.body);
-        addData(data, word);
-        return true;
-      } else {
-        final _formMini = GlobalKey<FormState>();
-        var dataResult = await CallDialogError(_formMini, word);
-        if(dataResult == statusAddVoca.Success){
-          return true;
-        }else{
-          return false;
-        }
+  int countNonSpaceWords(String input) {
+    List<String> words = input.split(" ");
+    int nonSpaceWordCount = 0;
+    for (String word in words) {
+      if (!word.contains(" ")) {
+        nonSpaceWordCount++;
       }
-    } catch (error) {
-      // Xử lý lỗi
-      print('Error: $error');
-      return false;
     }
+
+    return nonSpaceWordCount;
   }
+
+  Future<bool> callAPI(String word) async {
+    if(countNonSpaceWords(word) >= 2){
+      try {
+        final response = await http.get(
+            Uri.parse('https://api.urbandictionary.com/v0/define?term=$word'));
+        if (response.statusCode == 200) {
+          var data = json.decode(response.body);
+          var sizeData = (data["list"] as List).length;
+          if(sizeData >= 1){
+            addDataPhrasalPerb(data);
+            return true;
+          }else{
+            final _formMini = GlobalKey<FormState>();
+            var dataResult = await CallDialogError(_formMini, word);
+            if (dataResult == statusAddVoca.Success) {
+              return true;
+            } else {
+              return callAPI(widget.wordNew);
+            }
+          }
+        } else {
+          final _formMini = GlobalKey<FormState>();
+          var dataResult = await CallDialogError(_formMini, word);
+          if (dataResult == statusAddVoca.Success) {
+            return true;
+          } else {
+            return callAPI(widget.wordNew);
+          }
+        }
+      } catch (error) {
+        print('Error: $error');
+        return false;
+      }
+    }else{
+      try {
+        final response = await http.get(
+            Uri.parse('https://api.dictionaryapi.dev/api/v1/entries/en/$word'));
+        if (response.statusCode == 200) {
+          var data = json.decode(response.body);
+          addData(data, word);
+          return true;
+        } else {
+          final _formMini = GlobalKey<FormState>();
+          var dataResult = await CallDialogError(_formMini, word);
+          if (dataResult == statusAddVoca.Success) {
+            return true;
+          } else {
+            return callAPI(widget.wordNew);
+          }
+        }
+      } catch (error) {
+        print('Error: $error');
+        return false;
+      }
+    }
+
+
+  }
+
 
   void onCallback(bool success) {
     completer.complete(success);
@@ -221,15 +326,14 @@ class _addVocabulary extends State<addVocabulary>{
       var success = await callAPI(word);
       if (success) {
         allCallsSuccessful = true;
+        continue;
       }
     }
 
 
     if (allCallsSuccessful) {
-      print(widget.listWord.length);
-
       //await widget.db.insetDataVocabulary(widget.listWord, widget.name_vocabulary);
-      updateVocabularyToFirebase();
+      //updateVocabularyToFirebase();
 
       DocumentReference docRef = FirebaseFirestore.instance.collection('users').doc(widget.authentical.currentUser!.uid).collection("dataAccount").doc("data");
       DocumentSnapshot docSnapshot = await docRef.get();
@@ -244,18 +348,35 @@ class _addVocabulary extends State<addVocabulary>{
 
 
       AwesomeDialog(
-        dismissOnTouchOutside: false,
         context: context,
-        dialogType: DialogType.success,
+        dialogType: DialogType.noHeader,
         animType: AnimType.scale,
-        title: 'Success',
-        btnOkOnPress: () {
-          setState(() {
-            widget.isLoading = false;
-          });
-          Navigator.of(context).pop();
-        },
+        dismissOnTouchOutside: false,
+        body: Column(
+          children: [
+            const Center(
+              child: Text("Data Your Set", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
+            ),
+            tableSet(listData: (widget.listWord)!)
+          ],
+        ),
+        btnOkOnPress: () {},
       ).show();
+
+
+      // AwesomeDialog(
+      //   dismissOnTouchOutside: false,
+      //   context: context,
+      //   dialogType: DialogType.success,
+      //   animType: AnimType.scale,
+      //   title: 'Success',
+      //   btnOkOnPress: () {
+      //     setState(() {
+      //       widget.isLoading = false;
+      //     });
+      //     Navigator.of(context).pop();
+      //   },
+      // ).show();
     }
   }
 
@@ -376,6 +497,12 @@ class _addVocabulary extends State<addVocabulary>{
                                   widget.isLoading = true;
                                 });
 
+                                if(widget.linkImages != null){
+                                  var images_background = storage.ref().child("VocabularyImage").child("${widget.name_vocabulary}_${widget.authentical.currentUser!.uid}.jpg");
+                                  await images_background.putFile(File(widget.linkImages));
+                                  widget.linkURLImages = await images_background.getDownloadURL();
+                                }
+
                                 if((await widget.db.hasSet("VocabularyList", {"tokenUID": widget.authentical.currentUser!.uid, "nameSet": widget.name_vocabulary}))){
                                   AwesomeDialog(
                                       dismissOnTouchOutside: false,
@@ -394,10 +521,7 @@ class _addVocabulary extends State<addVocabulary>{
                                   hanldWord(widget.StringListWord);
                                 }
 
-                                if(widget.linkImages != null){
-                                  var images_background = storage.ref().child("VocabularyImage").child("${widget.name_vocabulary}_${widget.authentical.currentUser!.uid}.jpg");
-                                  await images_background.putFile(File(widget.linkImages));
-                                }
+
                                 
                               },
                               style: ElevatedButton.styleFrom(

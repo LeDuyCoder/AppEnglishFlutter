@@ -8,7 +8,8 @@ enum Typeword {
   preposition,
   conjunction,
   interjection,
-  undefined
+  undefined,
+  phrasal_verb
 }
 
 class Word{

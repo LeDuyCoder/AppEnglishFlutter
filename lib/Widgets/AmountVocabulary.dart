@@ -8,7 +8,7 @@ class AmountVocabulary{
          stream: FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser!.uid).collection("dataAccount").doc("data").snapshots(),
          builder: (ctx, snapshot){
            if(snapshot.connectionState == ConnectionState.waiting){
-             return Text("Your Vocabulary -/1", style: txtStyle); // Bọc chuỗi trong widget Text và trả về
+             return Text("Your Vocabulary -/-", style: txtStyle); // Bọc chuỗi trong widget Text và trả về
            }
            if(snapshot.hasError){
              return Text("Error: ${snapshot.error}", style: txtStyle,); // Bọc chuỗi trong widget Text và trả về
@@ -17,7 +17,13 @@ class AmountVocabulary{
            DocumentSnapshot docSnapshot = snapshot.data!;
 
            final data = docSnapshot["amount_vocabulary_list"];
-           return Text("Your Vocabulary ${data}/1", style: txtStyle); // Bọc chuỗi trong widget Text và trả về
+           bool vip = docSnapshot["vip"];
+
+           if(vip){
+             return Text("Your Vocabulary ${data}/50", style: txtStyle);
+           }else{
+             return Text("Your Vocabulary ${data}/1", style: txtStyle);
+           }
          }
      );
   }

@@ -5,6 +5,8 @@ import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../Screen/ScreenEdit.dart';
+
 class tableSet extends StatefulWidget{
   @override
   State<StatefulWidget> createState() => _tableSet();
@@ -17,252 +19,47 @@ class tableSet extends StatefulWidget{
 
 class _tableSet extends State<tableSet> {
 
+  int timeLeft = 5;
 
-  Future<void> DialogReFix(Word elementWorld) async{
-    final _miniForm = GlobalKey<FormState>();
-    var status = false;
-    var _word = "";
-    var _phonicUS = "";
-    var _phonicUK = "";
-    var _meas = "";
-    var _example = "";
+  void startTimer() {
+    Future.delayed(const Duration(seconds: 5), () {
+      Navigator.of(context).pop();
+    });
+  }
 
 
-    AwesomeDialog(
-        onDismissCallback: (type){
-          if(type == DismissType.btnCancel){
-            Navigator.of(context).pop(type);
-          }else if(type == DismissType.btnOk){
-            if(status == true){
-              Navigator.of(context).pop(type);
-            }
-          }
-        },
-        autoDismiss: false,
-        dismissOnTouchOutside: false,
-        context: context,
-        dialogType: DialogType.noHeader,
-        animType: AnimType.scale,
-        body: Container(
-          height: 200,
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                const Text("Update data vocabulary", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
-                Form(
-                    key: _miniForm,
-                    child: Column(
-                      children: [
-                        Container(
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            border: Border.all(color: Colors.grey), // Border của container
-                            borderRadius: BorderRadius.circular(8.0), // Điều chỉnh độ cong của border
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.5), // Màu và độ trong suốt của đổ bóng
-                                spreadRadius: 2,
-                                blurRadius: 7,
-                                offset: Offset(0, 3), // Điều chỉnh vị trí của đổ bóng
-                              ),
-                            ],
-                          ),
-                          child: TextFormField(
-                            initialValue: elementWorld.word,
-                            // Dữ liệu ban đầu của TextFormField
-                            decoration: const InputDecoration(
-                              hintText: "word",
-                              border: InputBorder.none, // Xóa border của TextFormField
-                              contentPadding: EdgeInsets.only(left: 10, bottom: 10), // Padding bên trong TextFormField
-                            ),
-                            validator: (value){
-                              if(value!.trim().isEmpty){
-                                return "world not null";
-                              }
 
-                              if(elementWorld.word != value){
-                                _word = value;
-                              }
-                            },
-                          ),
-                        ),
-                        SizedBox(height: 10,),
-                        Row(
-                          children: [
-                            Expanded(child: Container(
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                border: Border.all(color: Colors.grey), // Border của container
-                                borderRadius: BorderRadius.circular(8.0), // Điều chỉnh độ cong của border
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.withOpacity(0.5), // Màu và độ trong suốt của đổ bóng
-                                    spreadRadius: 2,
-                                    blurRadius: 7,
-                                    offset: Offset(0, 3), // Điều chỉnh vị trí của đổ bóng
-                                  ),
-                                ],
-                              ),
-                              child: TextFormField(
-                                initialValue: elementWorld.phonicUS,
-                                // Dữ liệu ban đầu của TextFormField
-                                decoration: const InputDecoration(
-                                  hintText: "phonicUS",
-                                  border: InputBorder.none, // Xóa border của TextFormField
-                                  contentPadding: EdgeInsets.only(left: 10, bottom: 10), // Padding bên trong TextFormField
-                                ),
-                                validator: (value){
-                                  if(value!.trim().isEmpty){
-                                    return "phonicUS not null";
-                                  }
+  void DialogReFix(Word elementWorld){
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (ctx) =>
+          ScreenEdit(
+            elementWorld: elementWorld,
+            updateWord: (oldWord, newWord){
+              setState(() {
+          var position = widget.listData.indexOf(oldWord);
+          widget.listData.remove(oldWord);
+          widget.listData.insert(position, newWord);
 
-                                  if(elementWorld.phonicUS != value){
-                                    _phonicUS = value;
-                                  }
-                                },
-                              ),
-                            ),),
-                            const SizedBox(width: 10),
-                            Expanded(child: Container(
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                border: Border.all(color: Colors.grey), // Border của container
-                                borderRadius: BorderRadius.circular(8.0), // Điều chỉnh độ cong của border
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.withOpacity(0.5), // Màu và độ trong suốt của đổ bóng
-                                    spreadRadius: 2,
-                                    blurRadius: 7,
-                                    offset: Offset(0, 3), // Điều chỉnh vị trí của đổ bóng
-                                  ),
-                                ],
-                              ),
-                              child: TextFormField(
-                                initialValue: elementWorld.phonicUK,
-                                // Dữ liệu ban đầu của TextFormField
-                                decoration: const InputDecoration(
-                                  hintText: "phonicUK",
-                                  border: InputBorder.none, // Xóa border của TextFormField
-                                  contentPadding: EdgeInsets.only(left: 10, bottom: 10), // Padding bên trong TextFormField
-                                ),
-                                validator: (value){
-                                  if(value!.trim().isEmpty){
-                                    return "phonicUK not null";
-                                  }
-
-                                  if(elementWorld.phonicUK != value){
-                                    _phonicUK = value;
-                                  }
-                                },
-                              ),
-                            ),),
-                          ],
-                        ),
-                        SizedBox(height: 10,),
-                        Container(
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            border: Border.all(color: Colors.grey), // Border của container
-                            borderRadius: BorderRadius.circular(8.0), // Điều chỉnh độ cong của border
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.5), // Màu và độ trong suốt của đổ bóng
-                                spreadRadius: 2,
-                                blurRadius: 7,
-                                offset: Offset(0, 3), // Điều chỉnh vị trí của đổ bóng
-                              ),
-                            ],
-                          ),
-                          child: TextFormField(
-                            initialValue: elementWorld.means,
-                            // Dữ liệu ban đầu của TextFormField
-                            decoration: const InputDecoration(
-                              hintText: "means",
-                              border: InputBorder.none, // Xóa border của TextFormField
-                              contentPadding: EdgeInsets.only(left: 10, bottom: 10), // Padding bên trong TextFormField
-                            ),
-                            validator: (value){
-                              if(value!.trim().isEmpty){
-                                return "Means not null";
-                              }
-
-                              if(elementWorld.means != value){
-                                _meas = value;
-                              }
-                            },
-                          ),
-                        ),
-                        SizedBox(height: 10,),
-                        Container(
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            border: Border.all(color: Colors.grey), // Border của container
-                            borderRadius: BorderRadius.circular(8.0), // Điều chỉnh độ cong của border
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.5), // Màu và độ trong suốt của đổ bóng
-                                spreadRadius: 2,
-                                blurRadius: 7,
-                                offset: Offset(0, 3), // Điều chỉnh vị trí của đổ bóng
-                              ),
-                            ],
-                          ),
-                          child: TextFormField(
-                            initialValue: elementWorld.example,
-                            // Dữ liệu ban đầu của TextFormField
-                            decoration: const InputDecoration(
-                              hintText: "example",
-                              border: InputBorder.none, // Xóa border của TextFormField
-                              contentPadding: EdgeInsets.only(left: 10, bottom: 10), // Padding bên trong TextFormField
-                            ),
-                            validator: (value){
-                              if(value!.trim().isEmpty){
-                                return "Example not null";
-                              }
-
-                              if(elementWorld.example != value){
-                                _example = value;
-                              }
-                            },
-                          ),
-                        ),
-                      ],
-                    )
-                ),
-              ],
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              backgroundColor: Colors.green,
+              content: Text(
+                "Update word success",
+                style: TextStyle(color: Colors.white),
+              ),
             ),
-          )
-        ),
-        btnCancelOnPress: () {},
-        btnOkOnPress: () {
-          final isValid = _miniForm.currentState!.validate();
-          if (isValid) {
-            _miniForm.currentState!.save();
+          );
 
-            if(_word != "" || _phonicUS != "" || _phonicUK != "" || _meas != "" || _example != ""){
-              widget.listData.remove(elementWorld);
-              widget.listData.add(
-                  Word(
-                      word: _word == "" ? elementWorld.word : _word,
-                      type: elementWorld.type,
-                      linkUK: elementWorld.linkUK,
-                      linkUS: elementWorld.linkUS,
-                      phonicUK: _phonicUK == "" ? elementWorld.phonicUK : _phonicUK,
-                      phonicUS: _phonicUS == "" ? elementWorld.phonicUS : _phonicUS,
-                      means: _meas == "" ? elementWorld.means : _meas,
-                      example: _example == "" ? elementWorld.example : _example
-                  )
-              );
-            }
-            status = true;
-          }
-        },
-    ).show();
+          startTimer();
+        });
+             },
+            removeWord: (oldWord){
+              setState(() {
+                widget.listData.remove(oldWord);
+              });
+            },
+          ))
+    );
   }
 
   @override

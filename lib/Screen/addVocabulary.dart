@@ -179,6 +179,7 @@ class _addVocabulary extends State<addVocabulary>{
             "phonicUK": element.phonicUK,
             "mean": element.means,
             "example": element.example,
+            "level": 0,
           }
       );
       dbStore.collection("users").doc(widget.authentical.currentUser!.uid).collection("VocabularyData").doc(widget.name_vocabulary).set({
@@ -353,15 +354,24 @@ class _addVocabulary extends State<addVocabulary>{
         animType: AnimType.scale,
         dismissOnTouchOutside: false,
         body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Center(
               child: Text("Data Your Set", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
             ),
+            const Text("NOTE ⚠:\ncheck again before submit please\nif you want edit let to long press", style: TextStyle(color: Colors.grey),),
+            SizedBox(height: 10,),
             tableSet(listData: (widget.listWord)!)
           ],
         ),
-        btnOkOnPress: () {},
+        btnOkOnPress: () async {
+          await DataBaseHelper().insertSet(widget.name_vocabulary);
+          await DataBaseHelper().addVocabulary(widget.listWord, widget.name_vocabulary);
+          updateVocabularyToFirebase();
+          Navigator.of(context).pop();
+        },
       ).show();
+
 
 
       // AwesomeDialog(
@@ -454,7 +464,7 @@ class _addVocabulary extends State<addVocabulary>{
                                           return "Name set vocabulary not valid";
                                         }
 
-                                        widget.name_vocabulary = value;
+                                        widget.name_vocabulary = value.replaceAll(" ", "_");
                                       },
                                     )
                                 ),
@@ -520,9 +530,6 @@ class _addVocabulary extends State<addVocabulary>{
                                 }else{
                                   hanldWord(widget.StringListWord);
                                 }
-
-
-                                
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.blue, // Màu nền của nút

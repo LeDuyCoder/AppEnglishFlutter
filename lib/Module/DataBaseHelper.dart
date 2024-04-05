@@ -1,4 +1,6 @@
 import 'package:appenglish/Module/word.dart';
+import 'package:appenglish/Screen/addVocabulary.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
@@ -7,7 +9,8 @@ import 'package:path/path.dart';
 class DataBaseHelper {
   final databaseName = "DataAppEnglish.db";
   final noteTableAccount = "CREATE TABLE 'AccountUSer' ( 'mail'	TEXT NOT NULL, 'tokenUID'	TEXT NOT NULL, PRIMARY KEY('tokenUID'))";
-  final noteTableVocabularyList = "CREATE TABLE 'VocabularyList' ('tokenUID'	TEXT NOT NULL, 'nameSet'	TEXT NOT NULL, 'word' TEXT NOT NULL, 'type'	TEXT NOT NULL, 'linkUS'	TEXT NOT NULL, 'linkUK'	TEXT NOT NULL, 'phonicUS'	TEXT NOT NULL, 'phonicUK'	TEXT NOT NULL, 'means'	TEXT NOT NULL, 'example'	TEXT NOT NULL, FOREIGN KEY ('tokenUID') REFERENCES 'AccountUser' ('tokenUID'))";
+  final noteTableVocabularyList = "CREATE TABLE 'VocabularyList' ('tokenUID'	TEXT NOT NULL, 'nameSet' TEXT NOT NULL)";
+  final noteTableListVocabulary = "CREATE TABLE 'LisVoc' ('tokenUID'	TEXT NOT NULL, 'nameSet' TEXT NOT NULL, 'word' TEXT NOT NULL, 'type' TEXT NOT NULL, 'linkUS' TEXT NOT NULL, 'linkUK' TEXT NOT NULL, 'phonicUS' TEXT NOT NULL, 'phonicUK' TEXT NOT NULL, 'mean' TEXT NOT NULL, 'example' TEXT NOT NULL, 'level' INTEGER NOT NULL)";
   final AuthenticanUser = FirebaseAuth.instance;
 
   Future<Database> initDB() async{
@@ -16,34 +19,91 @@ class DataBaseHelper {
     return openDatabase(path, version: 1, onCreate: (db, version) async{
       await db.execute(noteTableAccount);
       await db.execute(noteTableVocabularyList);
+      await db.execute(noteTableListVocabulary);
     });
   }
 
+  Future<void> addVocabulary(List<Word> data, String nameSet) async {
+    final db = await initDB();
+    try {
+      for (var element in data) {
+        await db.insert("LisVoc", {
+          "tokenUID": AuthenticanUser.currentUser!.uid,
+          "nameSet": nameSet,
+          "word": element.word,
+          "type": element.type.name,
+          "linkUS": element.linkUS,
+          "linkUK": element.linkUK,
+          "phonicUS": element.phonicUS,
+          "phonicUK": element.phonicUK,
+          "mean": element.means,
+          "example": element.example,
+          "level": 0,
+        });
+      }
+    } finally {
+      db.close();
+    }
+  }
 
-  Future<void> insetDataVocabulary(List<Word> data, String nameSet) async{
+
+  Future<List<Map<String, dynamic>>> getAllData(tableName, Map<String, String> arraycondition) async{
+    final db = await initDB();
+    String conditions = '';
+    var amount = 1;
+    arraycondition.forEach((key, value) {
+      if(amount == arraycondition.length){
+        conditions += "$key = \'$value\' ";
+      }else {
+        conditions += '$key = \'$value\' AND ';
+      }
+      amount++;
+    });
+    List<Map<String, dynamic>> result = await db.query(tableName, where: conditions);
+    return result;
+  }
+
+  Future<void> updateData(List<String> datasWord, FirebaseAuth auth, String topic) async {
+    final db = await initDB();
+    String tokenUID = FirebaseAuth.instance.currentUser!.uid;
+    Map<String, int> dataHandles = {};
+    List<Map<String, dynamic>> datas = await getAllData("LisVoc", {"tokenUID": auth.currentUser!.uid, "nameSet": topic});
+
+    for (var element in datas) {
+      if(datasWord.contains(element["word"])){
+        dataHandles[element["word"]] = element["level"];
+      }
+    }
+
+    await Future.forEach(dataHandles.entries, (entry) async {
+      String word = entry.key;
+      int level = entry.value;
+
+      await db.update("LisVoc", {"level": level < 6 ? level + 1 : level}, where: "tokenUID = ? AND word = ?", whereArgs: [auth.currentUser!.uid, word]);
+      await FirebaseFirestore.instance.collection("users").doc(tokenUID).collection("VocabularyData").doc(topic).collection("listVocabulary").doc(word).update({"level": level < 6 ? level + 1 : level});
+    });
+
+    // Đóng cơ sở dữ liệu sau khi tất cả các thao tác hoàn thành
+    await db.close();
+
+    await Future.forEach(dataHandles.entries, (entry) async {
+      String word = entry.key;
+      int level = entry.value;
+
+      await FirebaseFirestore.instance.collection("users").doc(tokenUID).collection("VocabularyData").doc(topic).collection("listVocabulary").doc(word).update({"level": level < 6 ? level + 1 : level});
+    });
+  }
+
+  Future<void> insertSet(String nameSet) async{
     final db = await initDB();
 
-    await db.transaction((txn) async {
-      Batch batch = txn.batch();
-      data.forEach((word) {
-        batch.rawInsert(
-            'INSERT INTO VocabularyList (tokenUID, nameSet, word, type, linkUS, linkUK, phonicUS, phonicUK, means, example) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [
-              AuthenticanUser.currentUser!.uid,
-              nameSet,
-              word.word,
-              word.type.name,
-              word.linkUS,
-              word.linkUK,
-              word.phonicUS,
-              word.phonicUK,
-              word.means,
-              word.example]);
-      });
-
-      // Thực hiện thêm dữ liệu bằng batch
-      await batch.commit();
-    });
+    await db.insert(
+      'VocabularyList',
+      {
+        'tokenUID': AuthenticanUser.currentUser!.uid,
+        'nameSet': nameSet
+      },
+    );
 
     db.close();
   }

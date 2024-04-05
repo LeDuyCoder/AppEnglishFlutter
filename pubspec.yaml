@@ -48,7 +48,16 @@ dependencies:
   awesome_dialog: ^3.2.0
   rive: ^0.12.4
   sqflite: ^2.3.2
-  firebase_storage: ^11.6.9
+  firebase_storage: ^11.6.11
+  fl_chart: ^0.66.2
+  audioplayers: ^6.0.0
+  flutter_background_service: ^5.0.5
+  flutter_local_notifications: ^17.0.0
+  rxdart: ^0.27.7
+  provider: ^6.1.2
+  flutter_speech: ^2.0.0
+  permission_handler: ^11.3.0
+  shared_preferences: ^2.2.2
 
 dev_dependencies:
   flutter_test:
@@ -79,6 +88,10 @@ flutter:
     - assets/images/user.jpg
     - assets/images/user1.png
     - assets/images/image_vocabulary.png
+    - assets/images/note.png
+    - assets/Rive/congratulations.riv
+    - assets/Rive/loading.riv
+    - assets/Music/success_sound.mp3
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 

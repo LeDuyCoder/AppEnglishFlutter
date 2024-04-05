@@ -4,6 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+import '../local_notifications.dart';
+
 class loginScreen extends StatefulWidget{
   @override
   State<StatefulWidget> createState() => _loginScreen();

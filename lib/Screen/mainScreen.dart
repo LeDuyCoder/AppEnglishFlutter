@@ -1,3 +1,4 @@
+import 'package:appenglish/Module/readHive.dart';
 import 'package:appenglish/Screen/dasboardScreen.dart';
 import 'package:appenglish/Screen/loginScreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,6 +13,13 @@ class mainScreen extends StatefulWidget{
 }
 
 class _mainScreen extends State<mainScreen>{
+
+  @override
+  void dispose() {
+    ReadHive().closeHive();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(

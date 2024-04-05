@@ -47,11 +47,12 @@ class _dasboardScreen extends State<dasboardScreen>{
         .doc('data')
         .get();
 
-    setState(() {
-      widget.dataUser = dataz.data()!;
-      widget.isLoadingData = false;
-    });
-
+    if(mounted) {
+      setState(() {
+        widget.dataUser = dataz.data()!;
+        widget.isLoadingData = false;
+      });
+    }
   }
 
 
@@ -85,13 +86,13 @@ class _dasboardScreen extends State<dasboardScreen>{
         ],
 
       ),
-      appBar: AppBar(
-        actions: [
-          IconButton(onPressed: (){
-            FirebaseAuth.instance.signOut();
-          }, icon: Icon(Icons.logout))
-        ],
-      ),
+      // appBar: AppBar(
+      //   actions: [
+      //     IconButton(onPressed: (){
+      //       FirebaseAuth.instance.signOut();
+      //     }, icon: Icon(Icons.logout))
+      //   ],
+      // ),
       body: bodyDashBoard(),
     );
   }
@@ -102,6 +103,7 @@ class _dasboardScreen extends State<dasboardScreen>{
         alignment: Alignment.topCenter,
         children: [
           Container(
+            color: Colors.grey[200],
             height: MediaQuery.of(context).size.height,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -153,24 +155,7 @@ class _dasboardScreen extends State<dasboardScreen>{
                               children: [
                                 Padding(padding: EdgeInsets.only(left: 10),
                                     child: AmountVocabulary().getAmountVocabulary(TextStyle(color: Colors.black, fontSize: 30, fontWeight: FontWeight.bold))),
-                                FutureBuilder<bool>(
-                                  future: checkDataLocal(),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.connectionState == ConnectionState.waiting) {
-                                      return CircularProgressIndicator();
-                                    } else {
-                                      if (snapshot.hasError) {
-                                        return Text('Error: ${snapshot.error}');
-                                      } else {
-                                        if (snapshot.data == false) {
-                                          return YourVocabulary();
-                                        } else {
-                                          return Center();
-                                        }
-                                      }
-                                    }
-                                  },
-                                ),
+                                YourVocabulary(),
 
                                 const SizedBox(height: 10,),
                                 const Padding(padding: EdgeInsets.only(left: 10),

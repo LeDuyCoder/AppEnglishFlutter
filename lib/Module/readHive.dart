@@ -33,9 +33,11 @@ class ReadHive{
     if(prefs.containsKey(UIDToken.currentUser!.uid)){
       String? dataJson = prefs.getString(UIDToken.currentUser!.uid);
       Map<dynamic, dynamic> DataVocabularyUser = json.decode(dataJson!);
-      var DataVocabularyList = await DataVocabularyUser["vocabularyList"][Topic];
-      for(var data in DataVocabularyList){
-        ListVocabularyHaveLearn.add(data);
+      if(DataVocabularyUser["vocabularyList"].containsKey(Topic)){
+        var DataVocabularyList = await DataVocabularyUser["vocabularyList"][Topic];
+        for(var data in DataVocabularyList){
+          ListVocabularyHaveLearn.add(data);
+        }
       }
     }
 
@@ -64,18 +66,32 @@ class ReadHive{
     if(prefs.containsKey(UIDToken.currentUser!.uid)){
       String? jsonData = prefs.getString(UIDToken.currentUser!.uid);
       Map<dynamic, dynamic> DataUser = json.decode(jsonData!);
-      List<String> DataVocabularyTopic = List<String>.from(DataUser["vocabularyList"][Topic]);
+      if(DataUser["vocabularyList"].containsKey(Topic)) {
+        List<String> DataVocabularyTopic = List<String>.from(
+            DataUser["vocabularyList"][Topic]);
 
-      DataVocabularyTopic.removeWhere((element) => !ListVocabularyHaveLearn.contains(element));
+        DataVocabularyTopic.removeWhere((element) =>
+        !ListVocabularyHaveLearn.contains(element));
 
-      ListVocabularyHaveLearn.forEach((element) {
-        if (!DataVocabularyTopic.contains(element)) {
-          DataVocabularyTopic.add(element);
+        ListVocabularyHaveLearn.forEach((element) {
+          if (!DataVocabularyTopic.contains(element)) {
+            DataVocabularyTopic.add(element);
+          }
+        });
+
+        DataUser["vocabularyList"][Topic] = DataVocabularyTopic;
+
+        if(DataUser["time"].containsKey(Topic)){
+          DataUser["time"][Topic] = Timestamp.now().seconds;
         }
-      });
 
-      DataUser["vocabularyList"][Topic] = DataVocabularyTopic;
-      prefs.setString(UIDToken.currentUser!.uid, json.encode(DataUser));
+        prefs.setString(UIDToken.currentUser!.uid, json.encode(DataUser));
+      }else{
+        DataUser["vocabularyList"][Topic] = ListVocabularyHaveLearn;
+        DataUser['time'][Topic] = Timestamp.now().seconds;
+        print(DataUser);
+        prefs.setString(UIDToken.currentUser!.uid, json.encode(DataUser));
+      }
     }else{
       Map<dynamic, dynamic> Datas = {
         "vocabularyList": {
@@ -149,7 +165,7 @@ class ReadHive{
     String? dataJson = prefs.getString(UIDToken.currentUser!.uid);
     Map<dynamic, dynamic> DataUser = json.decode(dataJson!);
     DataUser["time"][topic] = Timestamp.now().seconds;
-
+    print(DataUser);
     await prefs.setString(UUIDUser, json.encode(DataUser));
   }
 }

@@ -52,20 +52,16 @@ class _registerScreen extends State<registerScreen>{
 
           db.collection("users").doc(account.user!.uid).collection("dataAccount").doc("data").set(
             {
-              "ID": createID(amountUser+1),
               "urlImage": null,
               "name": "User${createID(amountUser+1)}",
+              "title": "newbie",
               "email": _email,
-              "exp": 0,
-              "nextexp": 216000,
-              "rank": 0,
               "vip": false,
-              "amount_vocabulary_list": 0
+              "amount_vocabulary_list": 0,
+              'limit_vocabulary': 1,
+              'list_friend': <String>[]
             }
           );
-
-          db.collection("users").doc(account.user!.uid).collection("yourVocabularry");
-          db.collection("users").doc(account.user!.uid).collection("appVocabulary");
 
           DataBaseHelper().insertDataAuthentical(_email);
 

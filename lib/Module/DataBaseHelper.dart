@@ -11,6 +11,7 @@ class DataBaseHelper {
   final noteTableAccount = "CREATE TABLE 'AccountUSer' ( 'mail'	TEXT NOT NULL, 'tokenUID'	TEXT NOT NULL, PRIMARY KEY('tokenUID'))";
   final noteTableVocabularyList = "CREATE TABLE 'VocabularyList' ('tokenUID'	TEXT NOT NULL, 'nameSet' TEXT NOT NULL)";
   final noteTableListVocabulary = "CREATE TABLE 'LisVoc' ('tokenUID'	TEXT NOT NULL, 'nameSet' TEXT NOT NULL, 'word' TEXT NOT NULL, 'type' TEXT NOT NULL, 'linkUS' TEXT NOT NULL, 'linkUK' TEXT NOT NULL, 'phonicUS' TEXT NOT NULL, 'phonicUK' TEXT NOT NULL, 'mean' TEXT NOT NULL, 'example' TEXT NOT NULL, 'level' INTEGER NOT NULL)";
+  final noteTableListFriends = "CREATE TABLE 'ListFriends' ('tokenUID'	TEXT NOT NULL, 'title' TEXT NOT NULL, 'linkImag' TEXT NOT NULL)";
   final AuthenticanUser = FirebaseAuth.instance;
 
   Future<Database> initDB() async{
@@ -20,6 +21,7 @@ class DataBaseHelper {
       await db.execute(noteTableAccount);
       await db.execute(noteTableVocabularyList);
       await db.execute(noteTableListVocabulary);
+      await db.execute(noteTableListFriends);
     });
   }
 
@@ -45,6 +47,50 @@ class DataBaseHelper {
       db.close();
     }
   }
+
+  Future<Map<String, dynamic>> getDataFriend(Map<String, String> arraycondition) async{
+    final db = await initDB();
+    String conditions = '';
+    var amount = 1;
+    arraycondition.forEach((key, value) {
+      if(amount == arraycondition.length){
+        conditions += "$key = \'$value\' ";
+      }else {
+        conditions += '$key = \'$value\' AND ';
+      }
+      amount++;
+    });
+    List<Map<String, Object?>> result = await db.query("ListFriends", where: conditions);
+    if(result.isEmpty){
+      return {};
+    }else {
+      return result[0];
+    }
+  }
+
+  Future<void> insertFirends(Map<String, String> dataFirends) async{
+    final db = await initDB();
+
+    await db.insert(
+      'ListFriends',
+      {
+        'tokenUID': dataFirends['tokenUID'],
+        'title': dataFirends['title'],
+        'linkImag': dataFirends['linkImag']
+      },
+    );
+
+    db.close();
+  }
+  
+  Future<void> removeFriend(String UUID_Friend) async {
+    final db = await initDB();
+    await db.delete(
+      'ListFriends',
+      where: 'tokenUID = $UUID_Friend',
+    );
+  }
+
 
 
   Future<List<Map<String, dynamic>>> getAllData(tableName, Map<String, String> arraycondition) async{

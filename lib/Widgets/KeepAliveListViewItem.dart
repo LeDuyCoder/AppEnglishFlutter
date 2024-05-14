@@ -68,7 +68,7 @@ class _KeepAliveListViewItemState extends State<KeepAliveListViewItem> with Auto
   Widget build(BuildContext context) {
     super.build(context);
     return Container(
-      height: 200,
+      height: 150,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: widget.snapshot.data!.size + 1,
@@ -99,7 +99,6 @@ class _KeepAliveListViewItemState extends State<KeepAliveListViewItem> with Auto
                     double progress = amountSnapshot2.data ?? 0;
 
                     return Container(
-                        height: 200,
                         child:CardVocabulary(
                           DataSet: cardDataSet(
                             linkImage: (widget.snapshot.data!.docs[index]).data()["image"],

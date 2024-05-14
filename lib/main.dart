@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:isolate';
 
 import 'package:appenglish/Module/readHive.dart';
+import 'package:appenglish/Screen/dasboardScreen.dart';
 import 'package:appenglish/Screen/mainScreen.dart';
 import 'package:appenglish/Screen/splatScreen.dart';
 import 'package:appenglish/local_notifications.dart';
@@ -10,6 +13,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:lifecycle/lifecycle.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'firebase_options.dart';
 
@@ -49,7 +54,34 @@ void myTask(ServiceInstance service) async {
       options: DefaultFirebaseOptions.currentPlatform
   );
 
+
   FirebaseAuth Authential = FirebaseAuth.instance;
+
+  bool isWithinSpecificTime(DateTime time) {
+    // Đặt thời gian bắt đầu và kết thúc của khoảng thời gian quy định
+    DateTime startTime = DateTime(time.year, time.month, time.day, 17, 0, 0); // 0 giờ
+    DateTime endTime = DateTime(time.year, time.month, time.day, 18, 0, 0); // 3 giờ 52 phút
+
+    return time.isAfter(startTime) && time.isBefore(endTime);
+  }
+
+  Timer.periodic(Duration(seconds: 1), (timer) async {
+    DateTime now = DateTime.now();
+    if (Authential.currentUser != null && isWithinSpecificTime(now)) {
+      if (now.minute == 44 && now.second == 0) {
+        print("fuck lỗi kìa");
+        print(dasboardScreen.time_online);
+        if (dasboardScreen.time_online != 0) {
+          print("check");
+          // await FirebaseFirestore.instance.collection("users").doc(
+          //     Authential.currentUser!.uid).collection("dataAccount")
+          //     .doc("data")
+          //     .update({'time_online': dasboardScreen.time_online});
+        }
+      }
+    }
+  });
+
   Timer.periodic(const Duration(seconds: 60), (timer) async {
     Map<dynamic, dynamic> dataTimeUser = await ReadHive().getAllTimeService(FirebaseAuth.instance);
 
@@ -72,13 +104,15 @@ void myTask(ServiceInstance service) async {
 
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
 
+  const MyApp({super.key});
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+
     return MaterialApp(
+      navigatorObservers: [defaultLifecycleObserver],
       navigatorKey: navigatorKey,
       title: 'Flutter Demo',
       theme: ThemeData(

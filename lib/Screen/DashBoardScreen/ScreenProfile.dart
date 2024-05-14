@@ -656,40 +656,45 @@ class _ScreenProfile extends State<ScreenProfile>{
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    border: Border.all(
-                                      color: Colors.grey.withOpacity(0.6), // Màu của đường viền
-                                      width: 0.5, // Độ dày của đường viền
+                                GestureDetector(
+                                  onTap: (){
+                                    FirebaseAuth.instance.signOut();
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      border: Border.all(
+                                        color: Colors.grey.withOpacity(0.6), // Màu của đường viền
+                                        width: 0.5, // Độ dày của đường viền
+                                      ),
+                                      borderRadius: BorderRadius.circular(15.0),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.grey.withOpacity(0.6), // Màu của bóng đổ
+                                          spreadRadius: 2, // Bán kính lan rộng của bóng đổ
+                                          blurRadius: 2, // Độ mờ của bóng đổ
+                                          offset: Offset(-1, 1), // Độ lệch của bóng đổ theo chiều dọc
+                                        ),
+                                        BoxShadow(
+                                          color: Colors.grey.withOpacity(1), // Màu của bóng đổ
+                                          spreadRadius: 2, // Bán kính lan rộng của bóng đổ
+                                          blurRadius: 1, // Độ mờ của bóng đổ
+                                          offset: Offset(-2, 3), // Độ lệch của bóng đổ theo chiều dọc
+                                        ),
+                                      ],
                                     ),
-                                    borderRadius: BorderRadius.circular(15.0),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.grey.withOpacity(0.6), // Màu của bóng đổ
-                                        spreadRadius: 2, // Bán kính lan rộng của bóng đổ
-                                        blurRadius: 2, // Độ mờ của bóng đổ
-                                        offset: Offset(-1, 1), // Độ lệch của bóng đổ theo chiều dọc
-                                      ),
-                                      BoxShadow(
-                                        color: Colors.grey.withOpacity(1), // Màu của bóng đổ
-                                        spreadRadius: 2, // Bán kính lan rộng của bóng đổ
-                                        blurRadius: 1, // Độ mờ của bóng đổ
-                                        offset: Offset(-2, 3), // Độ lệch của bóng đổ theo chiều dọc
-                                      ),
-                                    ],
+                                    height: 50,
+                                    width: 200,
+                                    child: const Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.logout, color: Colors.red,),
+                                        SizedBox(width: 10,),
+                                        Text("Log out", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.red),),
+                                      ],
+                                    ),
                                   ),
-                                  height: 50,
-                                  width: 200,
-                                  child: const Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(Icons.logout, color: Colors.red,),
-                                      SizedBox(width: 10,),
-                                      Text("Log out", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.red),),
-                                    ],
-                                  ),
-                                ),
+                                )
                               ],
                             ),
                           ),

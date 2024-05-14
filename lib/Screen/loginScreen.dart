@@ -1,8 +1,12 @@
+import 'package:appenglish/Module/DataBaseHelper.dart';
+import 'package:appenglish/Module/word.dart';
 import 'package:appenglish/Screen/registerScreen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sqflite/sqflite.dart';
 
 import '../local_notifications.dart';
 
@@ -54,6 +58,64 @@ class _loginScreen extends State<loginScreen>{
       try {
         final loginAccount = await FirebaseAuth.instance
             .signInWithEmailAndPassword(email: _email, password: _pass);
+        if (loginAccount.user != null){
+          print("login success");
+          if(await DataBaseHelper().isData(loginAccount.user!.uid) == false){
+            //await DataBaseHelper().insertDataAuthentical(_email);
+            try {
+
+              CollectionReference vocabularyDataCollection = FirebaseFirestore.instance
+                  .collection("users")
+                  .doc(loginAccount.user!.uid)
+                  .collection("VocabularyData");
+
+              QuerySnapshot querySnapshot = await vocabularyDataCollection.get();
+
+              Map<String, dynamic> dataList = {};
+
+              await Future.forEach(querySnapshot.docs, (doc) async {
+                CollectionReference listVocabulary = vocabularyDataCollection.doc(doc.id).collection("listVocabulary");
+                QuerySnapshot querySnapshot2 = await listVocabulary.get();
+                Map<String, dynamic> listTopic = {};
+                await Future.forEach(querySnapshot2.docs, (element) async {
+
+                  DocumentSnapshot<Object?> dataVocabulary = await listVocabulary.doc(element.id).get();
+                  listTopic[element.id] = dataVocabulary.data();
+                });
+
+                dataList[doc.id] = [(doc.data() as Map<String, dynamic>)["image"], listTopic];
+              });
+
+
+              print("Check Error ${dataList}");
+
+              List<Word> dataListWord = [];
+
+              dataList.forEach((key, value) {
+                (value[1] as Map<String, dynamic>).forEach((keyWord, valueWord) {
+                  dataListWord.add(Word(
+                      word: keyWord,
+                      type: convertStringToEnum(valueWord["type"]),
+                      linkUK: valueWord["linkUK"],
+                      linkUS: valueWord["linkUS"],
+                      phonicUK: valueWord["phonicUK"],
+                      phonicUS: valueWord["phonicUS"],
+                      means: valueWord["mean"],
+                      example: valueWord["example"])
+                  );
+                });
+              });
+
+
+            } catch (e) {
+              print("Error fetching data: $e");
+            }
+
+          }
+        }
+        else{
+          print("check lỗi đăng nhập thất bài");
+        }
       }on FirebaseAuthException catch(e){
         print(e.code);
         if(e.code == "invalid-credential"){

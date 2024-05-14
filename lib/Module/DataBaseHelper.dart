@@ -25,6 +25,20 @@ class DataBaseHelper {
     });
   }
 
+  Future<bool> isData(String TokenUID) async {
+    final db = await initDB();
+
+    // Thực hiện truy vấn SQL để kiểm tra xem có bản ghi nào trong cơ sở dữ liệu có cột UUID như TokenUID đã cung cấp hay không
+    var result = await db.query(
+      'AccountUSer', // Tên bảng
+      where: 'tokenUID = ?', // Điều kiện: cột UUID bằng TokenUID được cung cấp
+      whereArgs: [TokenUID], // Giá trị của đối số ? trong điều kiện where
+    );
+
+    // Nếu kết quả truy vấn trả về ít nhất một dòng, tức là đã tìm thấy dữ liệu cho UUID đã cung cấp
+    return result.isNotEmpty;
+  }
+
   Future<void> addVocabulary(List<Word> data, String nameSet) async {
     final db = await initDB();
     try {

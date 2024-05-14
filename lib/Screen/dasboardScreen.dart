@@ -183,9 +183,12 @@ class _dasboardScreen extends State<dasboardScreen> {
 
   bodyDashBoard(){
     if(widget.currentSlect == 0){
-      return ScreenProfile(dataClound: widget.dataUserCloud,);
+      return Screen1();
+      //return ScreenProfile(dataClound: widget.dataUserCloud,);
     } else if(widget.currentSlect == 1){
       return ScreenUpVip();
+    } else if(widget.currentSlect == 2){
+      return ScreenProfile(dataClound: widget.dataUserCloud,);
     }
   }
 

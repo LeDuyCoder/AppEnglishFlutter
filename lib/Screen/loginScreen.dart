@@ -46,10 +46,9 @@ class _loginScreen extends State<loginScreen>{
 
     try {
       await _googleSignIn.signIn();
-      // Đăng nhập thành công, thực hiện các thao tác tiếp theo sau đây
     } catch (error) {
       print('Đăng nhập thất bại: $error');
-      // Xử lý lỗi đăng nhập
+
     }
   }
 
@@ -61,7 +60,7 @@ class _loginScreen extends State<loginScreen>{
         if (loginAccount.user != null){
           print("login success");
           if(await DataBaseHelper().isData(loginAccount.user!.uid) == false){
-            //await DataBaseHelper().insertDataAuthentical(_email);
+            await DataBaseHelper().insertDataAuthentical(_email);
             try {
 
               CollectionReference vocabularyDataCollection = FirebaseFirestore.instance
@@ -84,29 +83,42 @@ class _loginScreen extends State<loginScreen>{
                 });
 
                 dataList[doc.id] = [(doc.data() as Map<String, dynamic>)["image"], listTopic];
+                DataBaseHelper().insertSet(doc.id);
               });
 
 
               print("Check Error ${dataList}");
 
-              List<Word> dataListWord = [];
+              for (var entry in dataList.entries) {
+                var key = entry.key;
+                var value = entry.value;
 
-              dataList.forEach((key, value) {
-                (value[1] as Map<String, dynamic>).forEach((keyWord, valueWord) {
+                Map<String, dynamic> wordMap = value[1] as Map<String, dynamic>;
+                List<Word> dataListWord = []; // Create a new list for each key
+
+                for (var wordEntry in wordMap.entries) {
+                  var keyWord = wordEntry.key;
+                  var valueWord = wordEntry.value as Map<String, dynamic>;
+
                   dataListWord.add(Word(
-                      word: keyWord,
-                      type: convertStringToEnum(valueWord["type"]),
-                      linkUK: valueWord["linkUK"],
-                      linkUS: valueWord["linkUS"],
-                      phonicUK: valueWord["phonicUK"],
-                      phonicUS: valueWord["phonicUS"],
-                      means: valueWord["mean"],
-                      example: valueWord["example"])
-                  );
-                });
-              });
+                    word: keyWord,
+                    type: convertStringToEnum(valueWord["type"]),
+                    linkUK: valueWord["linkUK"],
+                    linkUS: valueWord["linkUS"],
+                    phonicUK: valueWord["phonicUK"],
+                    phonicUS: valueWord["phonicUS"],
+                    means: valueWord["mean"],
+                    example: valueWord["example"],
+                  ));
+                }
+                
+                print('Words for key $key: ${dataListWord.length}');
 
-
+                try {
+                } catch (e) {
+                  print('Failed to add vocabulary for key $key: $e');
+                }
+              }
             } catch (e) {
               print("Error fetching data: $e");
             }

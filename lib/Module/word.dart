@@ -48,6 +48,7 @@ class Word{
   String phonicUS, phonicUK;
   String means;
   String example;
+  int? level;
 
   Word({
     required this.word,
@@ -57,6 +58,7 @@ class Word{
     required this.phonicUK,
     required this.phonicUS,
     required this.means,
-    required this.example
+    required this.example,
+    this.level,
   });
 }

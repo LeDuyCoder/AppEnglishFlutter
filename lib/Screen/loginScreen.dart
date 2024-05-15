@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:appenglish/Module/DataBaseHelper.dart';
 import 'package:appenglish/Module/word.dart';
 import 'package:appenglish/Screen/registerScreen.dart';
@@ -61,66 +63,9 @@ class _loginScreen extends State<loginScreen>{
           print("login success");
           if(await DataBaseHelper().isData(loginAccount.user!.uid) == false){
             await DataBaseHelper().insertDataAuthentical(_email);
-            try {
-
-              CollectionReference vocabularyDataCollection = FirebaseFirestore.instance
-                  .collection("users")
-                  .doc(loginAccount.user!.uid)
-                  .collection("VocabularyData");
-
-              QuerySnapshot querySnapshot = await vocabularyDataCollection.get();
-
-              Map<String, dynamic> dataList = {};
-
-
-              await Future.forEach(querySnapshot.docs, (doc) async {
-                CollectionReference listVocabulary = vocabularyDataCollection.doc(doc.id).collection("listVocabulary");
-                QuerySnapshot querySnapshot2 = await listVocabulary.get();
-                Map<String, dynamic> listTopic = {};
-                await Future.forEach(querySnapshot2.docs, (element) async {
-
-                  DocumentSnapshot<Object?> dataVocabulary = await listVocabulary.doc(element.id).get();
-                  listTopic[element.id] = dataVocabulary.data();
-                });
-
-                dataList[doc.id] = [(doc.data() as Map<String, dynamic>)["image"], listTopic];
-
-                DataBaseHelper().insertSet(doc.id);
-              });
-
-
-              print("Check Error ${dataList}");
-
-              for (var entry in dataList.entries) {
-                var key = entry.key;
-                var value = entry.value;
-
-                Map<String, dynamic> wordMap = value[1] as Map<String, dynamic>;
-                List<Word> dataListWord = []; // Create a new list for each key
-
-                for (var wordEntry in wordMap.entries) {
-                  var keyWord = wordEntry.key;
-                  var valueWord = wordEntry.value as Map<String, dynamic>;
-
-                  dataListWord.add(Word(
-                    word: keyWord,
-                    type: convertStringToEnum(valueWord["type"]),
-                    linkUK: valueWord["linkUK"],
-                    linkUS: valueWord["linkUS"],
-                    phonicUK: valueWord["phonicUK"],
-                    phonicUS: valueWord["phonicUS"],
-                    means: valueWord["mean"],
-                    example: valueWord["example"],
-                  ));
-                }
-                
-                print('Words for key $key: ${dataListWord.length}');
-
-              }
-            } catch (e) {
-              print("Error fetching data: $e");
-            }
-
+            await hanldUpdateDataWorld(loginAccount, true);
+          }else{
+            await hanldUpdateDataWorld(loginAccount, false);
           }
         }
         else{
@@ -132,6 +77,67 @@ class _loginScreen extends State<loginScreen>{
           showSnackBarError("Invalid username or password");
         }
       }
+    }
+  }
+
+
+  Future<void> hanldUpdateDataWorld(UserCredential loginAccount, bool firstLogin) async{
+    try {
+      CollectionReference vocabularyDataCollection = FirebaseFirestore.instance
+          .collection("users")
+          .doc(loginAccount.user!.uid)
+          .collection("VocabularyData");
+
+      QuerySnapshot querySnapshot = await vocabularyDataCollection.get();
+
+      Map<String, dynamic> dataList = {};
+
+
+      await Future.forEach(querySnapshot.docs, (doc) async {
+        CollectionReference listVocabulary = vocabularyDataCollection.doc(doc.id).collection("listVocabulary");
+        QuerySnapshot querySnapshot2 = await listVocabulary.get();
+        Map<String, dynamic> listTopic = {};
+        await Future.forEach(querySnapshot2.docs, (element) async {
+
+          DocumentSnapshot<Object?> dataVocabulary = await listVocabulary.doc(element.id).get();
+          listTopic[element.id] = dataVocabulary.data();
+        });
+
+        dataList[doc.id] = [(doc.data() as Map<String, dynamic>)["image"], listTopic];
+        if(firstLogin) {
+          await DataBaseHelper().insertSet(doc.id);
+        }
+      });
+
+      for (var entry in dataList.entries) {
+        var key = entry.key;
+        var value = entry.value;
+
+        Map<String, dynamic> wordMap = value[1] as Map<String, dynamic>;
+        List<Word> dataListWord = []; // Create a new list for each key
+
+        for (var wordEntry in wordMap.entries) {
+          var keyWord = wordEntry.key;
+          var valueWord = wordEntry.value as Map<String, dynamic>;
+
+          dataListWord.add(Word(
+              word: keyWord,
+              type: convertStringToEnum(valueWord["type"]),
+              linkUK: valueWord["linkUK"],
+              linkUS: valueWord["linkUS"],
+              phonicUK: valueWord["phonicUK"],
+              phonicUS: valueWord["phonicUS"],
+              means: valueWord["mean"],
+              example: valueWord["example"],
+              level: valueWord["level"]
+          ));
+        }
+
+        print('Words for key $key: ${dataListWord.length}');
+        await DataBaseHelper().addVocabulary(dataListWord, key);
+      }
+    } catch (e) {
+      print("Error fetching data: $e");
     }
   }
 

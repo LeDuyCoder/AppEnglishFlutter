@@ -49,9 +49,6 @@ class _listFriendScreen extends State<listFriendScreen>{
 
   @override
   Widget build(BuildContext context) {
-
-    hanldeDataListFriend();
-
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(60.0), // Chiều cao của AppBar

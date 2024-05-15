@@ -43,22 +43,43 @@ class DataBaseHelper {
     final db = await initDB();
     try {
       for (var element in data) {
-        await db.insert("LisVoc", {
-          "tokenUID": AuthenticanUser.currentUser!.uid,
-          "nameSet": nameSet,
-          "word": element.word,
-          "type": element.type.name,
-          "linkUS": element.linkUS,
-          "linkUK": element.linkUK,
-          "phonicUS": element.phonicUS,
-          "phonicUK": element.phonicUK,
-          "mean": element.means,
-          "example": element.example,
-          "level": 0,
-        });
+        // Kiểm tra xem từ đã tồn tại hay chưa
+        List<Map<String, dynamic>> existingWords = await db.query(
+          "LisVoc",
+          where: "tokenUID = ? AND word = ?",
+          whereArgs: [AuthenticanUser.currentUser!.uid, element.word],
+        );
+
+        if (existingWords.isNotEmpty) {
+          // Từ đã tồn tại
+          if (element.level != null) {
+            // Cập nhật trường level nếu element.level khác null
+            await db.update(
+              "LisVoc",
+              {"level": element.level},
+              where: "tokenUID = ? AND word = ?",
+              whereArgs: [AuthenticanUser.currentUser!.uid, element.word],
+            );
+          }
+        } else {
+          // Thêm từ mới vào cơ sở dữ liệu
+          await db.insert("LisVoc", {
+            "tokenUID": AuthenticanUser.currentUser!.uid,
+            "nameSet": nameSet,
+            "word": element.word,
+            "type": element.type.name,
+            "linkUS": element.linkUS,
+            "linkUK": element.linkUK,
+            "phonicUS": element.phonicUS,
+            "phonicUK": element.phonicUK,
+            "mean": element.means,
+            "example": element.example,
+            "level": element.level ?? 0,
+          });
+        }
       }
     } finally {
-      db.close();
+      await db.close();
     }
   }
 
@@ -78,23 +99,34 @@ class DataBaseHelper {
     if(result.isEmpty){
       return {};
     }else {
-      return result[0];
+      return Map<String, dynamic>.from(result[0]);
     }
   }
 
-  Future<void> insertFirends(Map<String, String> dataFirends) async{
+  Future<void> insertFirends(Map<String, String> dataFirends) async {
     final db = await initDB();
+    try {
+      List<Map<String, dynamic>> existingRecords = await db.query(
+        'ListFriends',
+        where: 'tokenUID = ?',
+        whereArgs: [dataFirends['tokenUID']],
+      );
 
-    await db.insert(
-      'ListFriends',
-      {
-        'tokenUID': dataFirends['tokenUID'],
-        'title': dataFirends['title'],
-        'linkImag': dataFirends['linkImag']
-      },
-    );
-
-    db.close();
+      if (existingRecords.isEmpty) {
+        await db.insert(
+          'ListFriends',
+          {
+            'tokenUID': dataFirends['tokenUID'],
+            'title': dataFirends['title'],
+            'linkImag': dataFirends['linkImag']
+          },
+        );
+      } /*else {
+        //print('TokenUID ${dataFirends['tokenUID']} already exists in the database. Skipping insertion.');
+      }*/
+    } finally {
+      await db.close();
+    }
   }
   
   Future<void> removeFriend(String UUID_Friend) async {

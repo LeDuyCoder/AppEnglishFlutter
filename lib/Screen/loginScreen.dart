@@ -72,6 +72,7 @@ class _loginScreen extends State<loginScreen>{
 
               Map<String, dynamic> dataList = {};
 
+
               await Future.forEach(querySnapshot.docs, (doc) async {
                 CollectionReference listVocabulary = vocabularyDataCollection.doc(doc.id).collection("listVocabulary");
                 QuerySnapshot querySnapshot2 = await listVocabulary.get();
@@ -83,6 +84,7 @@ class _loginScreen extends State<loginScreen>{
                 });
 
                 dataList[doc.id] = [(doc.data() as Map<String, dynamic>)["image"], listTopic];
+
                 DataBaseHelper().insertSet(doc.id);
               });
 
@@ -114,10 +116,6 @@ class _loginScreen extends State<loginScreen>{
                 
                 print('Words for key $key: ${dataListWord.length}');
 
-                try {
-                } catch (e) {
-                  print('Failed to add vocabulary for key $key: $e');
-                }
               }
             } catch (e) {
               print("Error fetching data: $e");

@@ -1,3 +1,4 @@
+import 'package:appenglish/Screen/loginScreen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -6,14 +7,14 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'DashBoardScreen/QrScreen.dart';
 
 class InfomationFriendScreen extends StatefulWidget{
-  InfomationFriendScreen({super.key, required this.TokenUID});
+  InfomationFriendScreen({super.key, required this.TokenUID, required this.Friend, required this.loadListFriend});
 
   @override
   State<StatefulWidget> createState() => _InfomationFriendScreen();
 
   String TokenUID;
-  bool Friend = true;
-
+  bool Friend;
+  void Function() loadListFriend;
 
 }
 
@@ -247,9 +248,9 @@ class _InfomationFriendScreen extends State<InfomationFriendScreen>{
                                             child: Row(
                                               mainAxisAlignment: MainAxisAlignment.center,
                                               children: [
-                                                widget.Friend ? const Icon(Icons.people_alt, color: Color.fromRGBO(0, 209, 255, 1.0),) : const Icon(Icons.person_off, color: Colors.redAccent,),
+                                                widget.Friend == false ? const Icon(Icons.people_alt, color: Color.fromRGBO(0, 209, 255, 1.0),) : const Icon(Icons.person_off, color: Colors.redAccent,),
                                                 const SizedBox(width: 10,),
-                                                widget.Friend ? const Text("Friends", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color.fromRGBO(0, 209, 255, 1.0)),) : const Text("UnFriends", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.redAccent),),
+                                                widget.Friend == false ? const Text("Friends", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color.fromRGBO(0, 209, 255, 1.0)),) : const Text("UnFriends", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.redAccent),),
                                               ],
                                             ),
                                           ),
@@ -408,7 +409,8 @@ class _InfomationFriendScreen extends State<InfomationFriendScreen>{
     super.dispose();
 
     if(widget.Friend == false){
-      await FirebaseFirestore.instance.collection("users").doc(FirebaseAuth.instance.currentUser!.uid).collection("dataAccount").doc("data").update({"list_friend": FieldValue.arrayRemove([widget.TokenUID])});
+      await FirebaseFirestore.instance.collection("users").doc(FirebaseAuth.instance.currentUser!.uid).collection("dataAccount").doc("data").update({"list_friend": FieldValue.arrayRemove(["apKat2N0nKWJfFfqfmzbFkFAXPz1"])});
+      widget.loadListFriend;
     }
 
   }

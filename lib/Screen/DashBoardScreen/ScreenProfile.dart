@@ -290,7 +290,7 @@ class _ScreenProfile extends State<ScreenProfile>{
                                     children: [
                                       GestureDetector(
                                         onTap: (){
-                                          Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => listFriendScreen(dataCound: widget.dataClound)));
+                                          Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => listFriendScreen()));
                                         },
                                         child: Container(
                                           decoration: BoxDecoration(

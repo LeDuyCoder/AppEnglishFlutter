@@ -12,9 +12,14 @@ class InfomationFriendScreen extends StatefulWidget{
   State<StatefulWidget> createState() => _InfomationFriendScreen();
 
   String TokenUID;
+  bool Friend = true;
+
+
 }
 
 class _InfomationFriendScreen extends State<InfomationFriendScreen>{
+
+
 
   Future<Map<String, dynamic>> getDataFriend(TokenUID) async {
     FirebaseFirestore dataFiresStore = FirebaseFirestore.instance;
@@ -49,6 +54,8 @@ class _InfomationFriendScreen extends State<InfomationFriendScreen>{
       return [[255, 142, 142], [185, 32, 32]];
     }
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -205,8 +212,12 @@ class _InfomationFriendScreen extends State<InfomationFriendScreen>{
                                     child: Row(
                                       children: [
                                         GestureDetector(
-                                          onTap: (){
+                                          onTap: () async {
+                                            setState(() {
+                                              widget.Friend = !widget.Friend;
+                                            });
                                             //Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => listFriendScreen(dataCound: widget.dataClound)));
+                                            //await FirebaseFirestore.instance.collection("users").doc(FirebaseAuth.instance.currentUser!.uid).collection("dataAccount").doc("data").update({"list_friend": FieldValue.arrayRemove([])});
                                           },
                                           child: Container(
                                             decoration: BoxDecoration(
@@ -232,45 +243,17 @@ class _InfomationFriendScreen extends State<InfomationFriendScreen>{
                                               ],
                                             ),
                                             height: 60,
-                                            width: (MediaQuery.of(context).size.width - (MediaQuery.of(context).size.width*0.25)) - 10,
-                                            child: const Row(
+                                            width: MediaQuery.of(context).size.width - 20,
+                                            child: Row(
                                               mainAxisAlignment: MainAxisAlignment.center,
                                               children: [
-                                                Icon(Icons.people_alt, color: Color.fromRGBO(0, 209, 255, 1.0),),
-                                                SizedBox(width: 10,),
-                                                Text("List Friends", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color.fromRGBO(0, 209, 255, 1.0)),),
+                                                widget.Friend ? const Icon(Icons.people_alt, color: Color.fromRGBO(0, 209, 255, 1.0),) : const Icon(Icons.person_off, color: Colors.redAccent,),
+                                                const SizedBox(width: 10,),
+                                                widget.Friend ? const Text("Friends", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color.fromRGBO(0, 209, 255, 1.0)),) : const Text("UnFriends", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.redAccent),),
                                               ],
                                             ),
                                           ),
                                         ),
-                                        const SizedBox(width: 10,),
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            border: Border.all(
-                                              color: Colors.grey.withOpacity(0.6), // Màu của đường viền
-                                              width: 0.5, // Độ dày của đường viền
-                                            ),
-                                            borderRadius: BorderRadius.circular(15.0),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.grey.withOpacity(0.6), // Màu của bóng đổ
-                                                spreadRadius: 2, // Bán kính lan rộng của bóng đổ
-                                                blurRadius: 2, // Độ mờ của bóng đổ
-                                                offset: Offset(-1, 1), // Độ lệch của bóng đổ theo chiều dọc
-                                              ),
-                                              BoxShadow(
-                                                color: Colors.grey.withOpacity(1), // Màu của bóng đổ
-                                                spreadRadius: 2, // Bán kính lan rộng của bóng đổ
-                                                blurRadius: 1, // Độ mờ của bóng đổ
-                                                offset: Offset(-2, 3), // Độ lệch của bóng đổ theo chiều dọc
-                                              ),
-                                            ],
-                                          ),
-                                          height: 60,
-                                          width: (MediaQuery.of(context).size.width - (MediaQuery.of(context).size.width*0.85)),
-                                          child: Icon(Icons.settings, color: Colors.grey, size: 35,),
-                                        )
                                       ],
                                     ),
                                   )
@@ -420,4 +403,13 @@ class _InfomationFriendScreen extends State<InfomationFriendScreen>{
     );
   }
 
+  @override
+  void dispose() async {
+    super.dispose();
+
+    if(widget.Friend == false){
+      await FirebaseFirestore.instance.collection("users").doc(FirebaseAuth.instance.currentUser!.uid).collection("dataAccount").doc("data").update({"list_friend": FieldValue.arrayRemove([widget.TokenUID])});
+    }
+
+  }
 }

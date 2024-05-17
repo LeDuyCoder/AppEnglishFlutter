@@ -1,9 +1,12 @@
+import 'dart:convert';
+
 import 'package:appenglish/Module/DataBaseHelper.dart';
 import 'package:appenglish/Screen/loginScreen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:http/http.dart' as http;
 
 import 'DashBoardScreen/QrScreen.dart';
 
@@ -55,6 +58,21 @@ class _InfomationFriendScreen extends State<InfomationFriendScreen>{
       return [[164, 250, 255], [44, 182, 226]];
     }else{
       return [[255, 142, 142], [185, 32, 32]];
+    }
+  }
+
+  Future<List<List<int>>> hanldCardFriend(String UUID) async {
+    try {
+      final response = await http.get(Uri.parse('https://www.landernetwork.io.vn/backend_api/data_api.php?type=getTime&UID=${FirebaseAuth.instance.currentUser!.uid}'));
+      if (response.statusCode == 200) {
+        var data = json.decode(response.body)[0][0];
+        var _dataBackground = hanldeBackgroundCard(int.parse(data["timeOnline"]));
+        return _dataBackground;
+      }else{
+        return [[0, 0, 0], [0, 0, 0]];
+      }
+    } catch (error) {
+      return [[0, 0, 0], [0, 0, 0]];
     }
   }
 
@@ -168,57 +186,24 @@ class _InfomationFriendScreen extends State<InfomationFriendScreen>{
                                         Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Text("Lê Hữu Duy", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 25),),
-                                            Text("Newbie", style:  const TextStyle(fontSize: 15),),
+                                            Text(data.data!["name"], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 25),),
+                                            Text(data.data!["title"], style:  const TextStyle(fontSize: 15),),
                                           ],
                                         ),
-                                        Expanded(
-                                          child: Align(
-                                              alignment: AlignmentDirectional.topEnd,
-                                              child: GestureDetector(
-                                                  onTap: (){
-                                                    //Navigator.push(context, MaterialPageRoute(builder: (ctx) => QrScreen(dataUser: data)));
-                                                  },
-                                                  child: Stack(
-                                                    alignment: Alignment.center,
-                                                    children: [
-                                                      QrImageView(
-                                                        data: FirebaseAuth.instance.currentUser!.uid,
-                                                        version: QrVersions.auto,
-                                                        size: 60.0,
-                                                      ),
-
-                                                      Container(
-                                                        height: 50,
-                                                        width: 50,
-                                                        decoration: BoxDecoration(
-                                                            borderRadius: BorderRadius.circular(5.0),
-                                                            border: Border.all(
-                                                                color: const Color.fromRGBO(
-                                                                    123, 191, 253, 1.0),
-                                                                width: 1.5
-                                                            )
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  )
-                                              )
-                                          ),
-                                        )
                                       ],
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsets.only(left: 10),
+                                    padding: const EdgeInsets.only(left: 10),
                                     child: Row(
                                       children: [
-                                        Text("Friends: 0", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color.fromRGBO(0, 209, 255, 1.0)),),
+                                        Text("Friends: ${data.data!["list_friend"].length}", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color.fromRGBO(0, 209, 255, 1.0)),),
                                         SizedBox(width: 10,),
-                                        Text("Collection: 0", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color.fromRGBO(0, 209, 255, 1.0)),),
+                                        Text("Collection: ${data.data!["amount_vocabulary_list"]}", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color.fromRGBO(0, 209, 255, 1.0)),),
                                       ],
                                     ),
                                   ),
-                                  SizedBox(height: 10,),
+                                  const SizedBox(height: 10,),
                                   Padding(
                                     padding: EdgeInsets.only(left: 10, right: 10),
                                     child: Row(
@@ -274,130 +259,142 @@ class _InfomationFriendScreen extends State<InfomationFriendScreen>{
                             ),
                           ),
                           SizedBox(height: 50,),
-                          Container(
-                              width: MediaQuery.of(context).size.width,
-                              height: 200,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                              ),
-                              child: Container(
-                                  margin: const EdgeInsets.only(left: 40, right: 40, top: 15, bottom: 15),
+                          FutureBuilder(future: hanldCardFriend(widget.TokenUID), builder: (ctx, dataCard){
+                            if(dataCard.connectionState == ConnectionState.waiting){
+                              return CircularProgressIndicator(color: Colors.blue,);
+                            }
+
+                            if(dataCard.hasData){
+                              return Container(
+                                  width: MediaQuery.of(context).size.width,
+                                  height: 200,
                                   decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                      colors: [
-                                        Color.fromRGBO(_dataBackground[0][0], _dataBackground[0][1], _dataBackground[0][2], 1.0),
-                                        Color.fromRGBO(_dataBackground[1][0], _dataBackground[1][1], _dataBackground[1][2], 1.0),
-                                      ],
-                                      stops: [0.0, 1.0], // Điểm dừng của mỗi màu trong gradient (từ 0.0 đến 1.0)
-                                    ),
-                                    borderRadius: BorderRadius.circular(15),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.grey.withOpacity(0.5), // Màu của bóng đổ
-                                        spreadRadius: 0, // Bán kính lan rộng của bóng đổ
-                                        blurRadius: 7, // Độ mờ của bóng đổ
-                                        offset: const Offset(0, 4), // Độ lệch của bóng đổ theo chiều dọc
-                                      ),
-                                    ],
+                                    color: Colors.white,
                                   ),
-                                  child: Stack(
-                                    children: [
-                                      Container(
-                                        child: Column(
-                                          children: [
-                                            Row(
+                                  child: Container(
+                                      margin: const EdgeInsets.only(left: 40, right: 40, top: 15, bottom: 15),
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                          colors: [
+                                            Color.fromRGBO(_dataBackground[0][0], _dataBackground[0][1], _dataBackground[0][2], 1.0),
+                                            Color.fromRGBO(_dataBackground[1][0], _dataBackground[1][1], _dataBackground[1][2], 1.0),
+                                          ],
+                                          stops: [0.0, 1.0], // Điểm dừng của mỗi màu trong gradient (từ 0.0 đến 1.0)
+                                        ),
+                                        borderRadius: BorderRadius.circular(15),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.grey.withOpacity(0.5), // Màu của bóng đổ
+                                            spreadRadius: 0, // Bán kính lan rộng của bóng đổ
+                                            blurRadius: 7, // Độ mờ của bóng đổ
+                                            offset: const Offset(0, 4), // Độ lệch của bóng đổ theo chiều dọc
+                                          ),
+                                        ],
+                                      ),
+                                      child: Stack(
+                                        children: [
+                                          Container(
+                                            child: Column(
                                               children: [
-                                                Padding(
-                                                  padding: const EdgeInsets.only(left: 5),
-                                                  child: Image.asset("assets/images/ranks/leave.png", scale: 2.0),
+                                                Row(
+                                                  children: [
+                                                    Padding(
+                                                      padding: const EdgeInsets.only(left: 5),
+                                                      child: Image.asset("assets/images/ranks/leave.png", scale: 2.0),
+                                                    ),
+                                                    Expanded(
+                                                      child: Align(
+                                                          alignment: Alignment.centerRight,
+                                                          child: Stack(
+                                                            alignment: Alignment.center,
+                                                            children: [
+                                                              Container(
+                                                                height: 50,
+                                                                width: 50,
+                                                                decoration: BoxDecoration(
+                                                                  borderRadius: BorderRadius.circular(10.0),
+                                                                  color: Colors.white,
+                                                                ),
+                                                              ),
+                                                              QrImageView(
+                                                                data: FirebaseAuth.instance.currentUser!.uid,
+                                                                version: QrVersions.auto,
+                                                                size: 60.0,
+                                                              ),
+                                                            ],
+                                                          )
+                                                      ),
+                                                    )
+                                                  ],
                                                 ),
                                                 Expanded(
                                                   child: Align(
-                                                      alignment: Alignment.centerRight,
-                                                      child: Stack(
-                                                        alignment: Alignment.center,
-                                                        children: [
-                                                          Container(
-                                                            height: 50,
-                                                            width: 50,
-                                                            decoration: BoxDecoration(
-                                                              borderRadius: BorderRadius.circular(10.0),
-                                                              color: Colors.white,
-                                                            ),
-                                                          ),
-                                                          QrImageView(
-                                                            data: FirebaseAuth.instance.currentUser!.uid,
-                                                            version: QrVersions.auto,
-                                                            size: 60.0,
-                                                          ),
-                                                        ],
+                                                      alignment: Alignment.bottomRight,
+                                                      child: Padding(
+                                                        padding: EdgeInsets.only(bottom: 5, right: 5),
+                                                        child: Transform.rotate(
+                                                          angle: 35 * (3.14 / 180), // Chuyển đổi độ sang radian
+                                                          child: Image.asset("assets/images/ranks/leave.png", scale: 1.5),
+                                                        ),
                                                       )
                                                   ),
                                                 )
                                               ],
                                             ),
-                                            Expanded(
-                                              child: Align(
-                                                  alignment: Alignment.bottomRight,
-                                                  child: Padding(
-                                                    padding: EdgeInsets.only(bottom: 5, right: 5),
-                                                    child: Transform.rotate(
-                                                      angle: 35 * (3.14 / 180), // Chuyển đổi độ sang radian
-                                                      child: Image.asset("assets/images/ranks/leave.png", scale: 1.5),
+                                          ),
+                                          Container(
+                                            margin: EdgeInsets.only(top: 10),
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.end,
+                                              children: [
+                                                Container(
+                                                  width: (MediaQuery.of(context).size.width - 80)*0.3,
+                                                  child: widget.imageDataFriend == "" ? Image.asset(
+                                                    "assets/images/avata.png",
+                                                    height: 200,
+                                                    width: 200,
+                                                    fit: BoxFit.scaleDown,
+                                                    scale: 6,
+                                                  ) : ClipRect(
+                                                    child: Align(
+                                                      alignment: Alignment.center,
+                                                      child: OverflowBox(
+                                                        maxWidth: double.infinity,
+                                                        maxHeight: double.infinity,
+                                                        child: Image.network(
+                                                          widget.imageDataFriend,
+                                                          width: 70,
+                                                          height: 70,
+                                                          fit: BoxFit.cover, // Sử dụng BoxFit.cover để crop ảnh
+                                                        ),
+                                                      ),
                                                     ),
-                                                  )
-                                              ),
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                      Container(
-                                        margin: EdgeInsets.only(top: 10),
-                                        child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.end,
-                                          children: [
-                                            Container(
-                                              width: (MediaQuery.of(context).size.width - 80)*0.3,
-                                              child: Image.asset(
-                                                "assets/images/avata.png",
-                                                height: 200,
-                                                width: 200,
-                                                fit: BoxFit.scaleDown,
-                                                scale: 6,
-                                              ),
-                                              // child: data["urlImage"] == null ? Image.asset(
-                                              //   "assets/images/avata.png",
-                                              //   height: 200,
-                                              //   width: 200,
-                                              //   fit: BoxFit.scaleDown,
-                                              //   scale: 6,
-                                              // ) : Image.network(
-                                              //   data["urlImage"],
-                                              //   height: 200,
-                                              //   width: 200,
-                                              //   fit: BoxFit.cover,
-                                              // ),
+                                                  ),
+                                                ),
+                                                Container(
+                                                  width: (MediaQuery.of(context).size.width - 80)*0.6,
+                                                  child: Column(
+                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      Text(data.data!["name"], style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),),
+                                                      Text("Collection: ${data.data!["amount_vocabulary_list"]}", style:  TextStyle(fontSize: 15),),
+                                                    ],
+                                                  ),
+                                                )
+                                              ],
                                             ),
-                                            Container(
-                                              width: (MediaQuery.of(context).size.width - 80)*0.6,
-                                              child: const Column(
-                                                mainAxisAlignment: MainAxisAlignment.center,
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  Text("Lê Hữu Duy", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),),
-                                                  Text("Collection: 0", style:  TextStyle(fontSize: 15),),
-                                                ],
-                                              ),
-                                            )
-                                          ],
-                                        ),
+                                          )
+                                        ],
                                       )
-                                    ],
                                   )
-                              )
-                          ),
+                              );
+                            }else{
+                              return Text("Error", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),);
+                            }
+                          }),
                         ],
                       ),
                     )

@@ -23,7 +23,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 
 class dasboardScreen extends StatefulWidget{
-  static int time_online = 1295000;
+  static int time_online = 0;
 
   int currentSlect = 0;
   Map<String, dynamic> dataUser = {};
@@ -132,50 +132,50 @@ class _dasboardScreen extends State<dasboardScreen> {
       child: Scaffold(
         backgroundColor: widget.currentSlect == 0 ? Colors.white : Colors.grey[200],
         bottomNavigationBar: Container(
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.5), // Màu của bóng đổ
-                  spreadRadius: 5, // Bán kính lan rộng của bóng đổ
-                  blurRadius: 7, // Độ mờ của bóng đổ
-                  offset: const Offset(0, 3), // Độ lệch của bóng đổ theo chiều dọc
-                ),
-              ],
-            ),
-            height: 80,
-            child: Padding(
-              padding: const EdgeInsets.only(left: 30, right: 30),
-              child: GNav(// navigation bar padding
-                  backgroundColor: Colors.white,
-                  tabBackgroundColor: const Color.fromRGBO(123, 191, 253, 1.0),
-                  gap: 8,
-                  padding: const EdgeInsets.all(10),
-                  onTabChange: (index){
-                    setState(() {
-                      widget.currentSlect = index;
-                    });
-                  },
-                  activeColor: Colors.white,
-                  color: Color.fromRGBO(123, 191, 253, 1.0),
-                  tabs: const [
-                    GButton(
-                      icon: Icons.home,
-                      text: 'Home',
-                    ),
-                    GButton(
-                      icon: Icons.star,
-                      text: 'Vip',
-                    ),
-                    GButton(
-                      icon: Icons.account_circle_outlined,
-                      text: 'Profile',
-                    )
-                  ]
-              ),
-            )
-        ),
+      decoration: BoxDecoration(
+      borderRadius: const BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
+    color: Colors.white,
+    boxShadow: [
+    BoxShadow(
+    color: Colors.grey.withOpacity(0.5), // Màu của bóng đổ
+    spreadRadius: 5, // Bán kính lan rộng của bóng đổ
+    blurRadius: 7, // Độ mờ của bóng đổ
+    offset: const Offset(0, 3), // Độ lệch của bóng đổ theo chiều dọc
+    ),
+    ],
+    ),
+    height: 80,
+    child: Padding(
+    padding: const EdgeInsets.only(left: 30, right: 30),
+    child: GNav(// navigation bar padding
+    backgroundColor: Colors.white,
+    tabBackgroundColor: const Color.fromRGBO(123, 191, 253, 1.0),
+    gap: 8,
+    padding: const EdgeInsets.all(10),
+    onTabChange: (index){
+    setState(() {
+    widget.currentSlect = index;
+    });
+    },
+    activeColor: Colors.white,
+    color: Color.fromRGBO(123, 191, 253, 1.0),
+    tabs: const [
+    GButton(
+    icon: Icons.home,
+    text: 'Home',
+    ),
+    GButton(
+    icon: Icons.star,
+    text: 'Vip',
+    ),
+    GButton(
+    icon: Icons.account_circle_outlined,
+    text: 'Profile',
+    )
+    ]
+    ),
+    )
+    ),
         body: bodyDashBoard(),
       ),
     );

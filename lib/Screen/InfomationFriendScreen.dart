@@ -1,3 +1,4 @@
+import 'package:appenglish/Module/DataBaseHelper.dart';
 import 'package:appenglish/Screen/loginScreen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -15,6 +16,7 @@ class InfomationFriendScreen extends StatefulWidget{
   String TokenUID;
   bool Friend;
   void Function() loadListFriend;
+  String imageDataFriend = "";
 
 }
 
@@ -78,6 +80,9 @@ class _InfomationFriendScreen extends State<InfomationFriendScreen>{
         }
 
         if(data.hasData){
+
+          widget.imageDataFriend = data.data!["urlImage"];
+
           return Container(
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height,
@@ -94,8 +99,14 @@ class _InfomationFriendScreen extends State<InfomationFriendScreen>{
                     children: [
                       Expanded(
                         //data["urlImage"]
-                          child: Image.asset(
+                          child: widget.imageDataFriend == "" ? Image.asset(
                             "assets/images/avata.png",
+                            height: 250,
+                            width: 250,
+                            fit: BoxFit.scaleDown,
+                            scale: 4,
+                          ) : Image.network(
+                            widget.imageDataFriend,
                             height: 250,
                             width: 250,
                             fit: BoxFit.scaleDown,
@@ -371,12 +382,12 @@ class _InfomationFriendScreen extends State<InfomationFriendScreen>{
                                             ),
                                             Container(
                                               width: (MediaQuery.of(context).size.width - 80)*0.6,
-                                              child: Column(
+                                              child: const Column(
                                                 mainAxisAlignment: MainAxisAlignment.center,
                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
-                                                  Text("Lê Hữu Duy", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 25),),
-                                                  Text("Collection: 0", style:  const TextStyle(fontSize: 15),),
+                                                  Text("Lê Hữu Duy", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),),
+                                                  Text("Collection: 0", style:  TextStyle(fontSize: 15),),
                                                 ],
                                               ),
                                             )
@@ -413,5 +424,10 @@ class _InfomationFriendScreen extends State<InfomationFriendScreen>{
       widget.loadListFriend;
     }
 
+
+    if(widget.imageDataFriend != "") {
+      await DataBaseHelper().updateImageFriend(
+          widget.TokenUID, widget.imageDataFriend);
+    }
   }
 }

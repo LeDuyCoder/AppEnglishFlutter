@@ -127,8 +127,13 @@ class _listFriendScreen extends State<listFriendScreen>{
                                           child: ClipRect(
                                             child: Align(
                                               alignment: Alignment.center,
-                                              child: Image.asset(
+                                              child: data.data![index]["linkImag"] == null ? Image.asset(
                                                 "assets/images/avata.png",
+                                                fit: BoxFit.cover, // You can use cover to make sure the image fills the area
+                                                width: 70, // Set your desired width
+                                                height: 70, // Set your desired height
+                                              ) : Image.network(
+                                                data.data![index]["linkImag"],
                                                 fit: BoxFit.cover, // You can use cover to make sure the image fills the area
                                                 width: 70, // Set your desired width
                                                 height: 70, // Set your desired height

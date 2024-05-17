@@ -234,7 +234,16 @@ class DataBaseHelper {
     }
   }
 
+  Future<void> updateImageFriend(String friendId, String url) async {
+    final db = await initDB();
 
+    await db.update(
+      'ListFriends',
+      {'linkImag': url},
+      where: 'TokenUID = ?',
+      whereArgs: [friendId],
+    );
+  }
   // Future<void> insetListBook(List<Book> books) async {
   //   final db = await initDB();
   //   // Get a reference to the database.

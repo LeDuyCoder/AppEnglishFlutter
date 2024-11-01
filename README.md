@@ -17,8 +17,8 @@ AppEnglish is a mobile application designed to help users improve their English 
 
 ### Installation
 1. **Download the App:**
-    - Visit the Google Play Store or Apple App Store.
-    - Search for "AppEnglish" and download the application.
+    - Download file apk
+    - Install app
 
 2. **Create an Account:**
     - Open the app and click on the "Register" button.
@@ -29,16 +29,11 @@ AppEnglish is a mobile application designed to help users improve their English 
     - Enter your credentials to access your account.
 
 ## Usage
-1. **Select a Topic:**
-    - From the main dashboard, choose a vocabulary topic you want to learn.
+1. **Create a Topic:**
+    - From the main dashboard, choose a create vobulary
 
 2. **Start Learning:**
     - Engage in various exercises, quizzes, and games designed to enhance your vocabulary skills.
-    - Complete each activity to progress through the topic.
-
-3. **Receive Notifications:**
-    - Set up notifications within the app settings to remind you to review vocabulary regularly.
-    - Customize the frequency and timing of notifications according to your preference.
 
 ## Contribution
 We welcome contributions from the community! If you have any ideas or want to report issues, please follow these steps:

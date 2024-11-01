@@ -1,18 +1,18 @@
 # EnglishLearning
 
-AppEnglish is a mobile application designed to help users improve their English vocabulary through engaging exercises, quizzes, and games. Whether you're a beginner or looking to enhance your vocabulary skills, AppEnglish provides a user-friendly platform tailored for all learners.
+AppEnglish is a mobile application designed to help users improve their English vocabulary through quizzes. Whether you are a beginner or looking to enhance your vocabulary skills, AppEnglish offers a spaced repetition approach, suitable for all users.
 
 ## Features
 - **User Registration and Authentication:** Securely create accounts or log in with existing credentials.
 - **Diverse Vocabulary Topics:** Explore various topics to enhance your vocabulary based on your interests.
-- **Interactive Learning:** Engage in exercises, quizzes, and games that make learning fun and effective.
+- **Interactive Learning:** Engage in quizzes that make learning fun and effective.
 - **Progress Tracking:** Monitor your learning progress and revisit challenging vocabulary.
 - **Notifications:** Receive reminders to review vocabulary regularly, helping reinforce learning.
 
 ## Getting Started
 
 ### Prerequisites
-- **Device:** This application is compatible with Android and iOS devices.
+- **Device:** This application is compatible with Android devices.
 - **Internet Connection:** Ensure you have a stable internet connection for downloading resources and accessing online features.
 
 ### Installation

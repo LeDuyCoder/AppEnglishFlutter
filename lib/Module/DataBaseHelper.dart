@@ -14,6 +14,7 @@ class DataBaseHelper {
   final noteTableListFriends = "CREATE TABLE 'ListFriends' ('tokenUID'	TEXT NOT NULL, 'title' TEXT NOT NULL, 'linkImag' TEXT NOT NULL)";
   final AuthenticanUser = FirebaseAuth.instance;
 
+  /// Initializes the database and creates necessary tables if they do not already exist.
   Future<Database> initDB() async{
     final databasePath = await getDatabasesPath();
     final path = join(databasePath, databaseName);
@@ -25,20 +26,21 @@ class DataBaseHelper {
     });
   }
 
+  /// Checks if a record with the specified `TokenUID` exists in the `AccountUSer` table.
   Future<bool> isData(String TokenUID) async {
     final db = await initDB();
 
-    // Thực hiện truy vấn SQL để kiểm tra xem có bản ghi nào trong cơ sở dữ liệu có cột UUID như TokenUID đã cung cấp hay không
+
     var result = await db.query(
-      'AccountUSer', // Tên bảng
-      where: 'tokenUID = ?', // Điều kiện: cột UUID bằng TokenUID được cung cấp
-      whereArgs: [TokenUID], // Giá trị của đối số ? trong điều kiện where
+      'AccountUSer',
+      where: 'tokenUID = ?',
+      whereArgs: [TokenUID],
     );
 
-    // Nếu kết quả truy vấn trả về ít nhất một dòng, tức là đã tìm thấy dữ liệu cho UUID đã cung cấp
     return result.isNotEmpty;
   }
 
+  /// Adds vocabulary to the `LisVoc` table. Updates the level if the word already exists.
   Future<void> addVocabulary(List<Word> data, String nameSet) async {
     final db = await initDB();
     try {
@@ -83,6 +85,7 @@ class DataBaseHelper {
     }
   }
 
+  /// Retrieves a friend's data based on conditions provided in `arraycondition`.
   Future<Map<String, dynamic>> getDataFriend(Map<String, String> arraycondition) async{
     final db = await initDB();
     String conditions = '';
@@ -103,42 +106,7 @@ class DataBaseHelper {
     }
   }
 
-  Future<void> insertFirends(Map<String, String> dataFirends) async {
-    final db = await initDB();
-    try {
-      List<Map<String, dynamic>> existingRecords = await db.query(
-        'ListFriends',
-        where: 'tokenUID = ?',
-        whereArgs: [dataFirends['tokenUID']],
-      );
-
-      if (existingRecords.isEmpty) {
-        await db.insert(
-          'ListFriends',
-          {
-            'tokenUID': dataFirends['tokenUID'],
-            'title': dataFirends['title'],
-            'linkImag': dataFirends['linkImag']
-          },
-        );
-      } /*else {
-        //print('TokenUID ${dataFirends['tokenUID']} already exists in the database. Skipping insertion.');
-      }*/
-    } finally {
-      await db.close();
-    }
-  }
-  
-  Future<void> removeFriend(String UUID_Friend) async {
-    final db = await initDB();
-    await db.delete(
-      'ListFriends',
-      where: 'tokenUID = $UUID_Friend',
-    );
-  }
-
-
-
+  /// Retrieves all data from a table based on conditions in `arraycondition`.
   Future<List<Map<String, dynamic>>> getAllData(tableName, Map<String, String> arraycondition) async{
     final db = await initDB();
     String conditions = '';
@@ -155,6 +123,7 @@ class DataBaseHelper {
     return result;
   }
 
+  /// Updates the level of words in `LisVoc` and synchronizes with Firebase Firestore.
   Future<void> updateData(List<String> datasWord, FirebaseAuth auth, String topic) async {
     final db = await initDB();
     String tokenUID = FirebaseAuth.instance.currentUser!.uid;
@@ -175,7 +144,6 @@ class DataBaseHelper {
       await FirebaseFirestore.instance.collection("users").doc(tokenUID).collection("VocabularyData").doc(topic).collection("listVocabulary").doc(word).update({"level": level < 6 ? level + 1 : level});
     });
 
-    // Đóng cơ sở dữ liệu sau khi tất cả các thao tác hoàn thành
     await db.close();
 
     await Future.forEach(dataHandles.entries, (entry) async {
@@ -186,6 +154,7 @@ class DataBaseHelper {
     });
   }
 
+  /// Inserts a new vocabulary set in the `VocabularyList` table.
   Future<void> insertSet(String nameSet) async{
     final db = await initDB();
 
@@ -200,6 +169,7 @@ class DataBaseHelper {
     db.close();
   }
 
+  /// Inserts account authentication data into `AccountUSer` table.
   Future<void> insertDataAuthentical(String email) async {
     final db = await initDB();
 
@@ -214,6 +184,7 @@ class DataBaseHelper {
     db.close();
   }
 
+  /// Checks if a set exists in the specified `tableName` based on `arraycondition`.
   Future<bool> hasSet(tableName, Map<String, String> arraycondition) async {
     final db = await initDB();
     String conditions = '';
@@ -233,68 +204,4 @@ class DataBaseHelper {
       return true;
     }
   }
-
-  Future<void> updateImageFriend(String friendId, String url) async {
-    final db = await initDB();
-
-    await db.update(
-      'ListFriends',
-      {'linkImag': url},
-      where: 'TokenUID = ?',
-      whereArgs: [friendId],
-    );
-  }
-  // Future<void> insetListBook(List<Book> books) async {
-  //   final db = await initDB();
-  //   // Get a reference to the database.
-  //
-  //   for (var book in books) {
-  //
-  //     List<Map<String, dynamic>> result = await db.query(
-  //       'Books',
-  //       where: 'ID = ?',
-  //       whereArgs: [book.ID],
-  //     );
-  //
-  //     if (result.isNotEmpty) {
-  //       // Nếu sách đã tồn tại, thực hiện cập nhật thông tin sách
-  //       await db.update(
-  //         'Books',
-  //         book.toMap(),
-  //         where: 'ID = ?',
-  //         whereArgs: [book.ID],
-  //       );
-  //     } else {
-  //       // Nếu sách chưa tồn tại, thực hiện thêm mới
-  //       await db.insert('Books', book.toMap());
-  //     }
-  //   }
-  // }
-
-  // Future<void> removeItem(Book book) async {
-  //   final db = await initDB();
-  //   await db.delete(
-  //     "Books",
-  //     where: 'ID = ?',
-  //     whereArgs: [book.ID],
-  //   );
-  // }
-
-  // Future<List<Book>> GetAllData() async {
-  //   final db = await initDB();
-  //   List<Map<String, dynamic>> result = await db.query('Books');
-  //
-  //   // Chuyển đổi danh sách Map sang danh sách Book
-  //   List<Book> books = [];
-  //   for (var item in result) {
-  //     books.add(Book(
-  //       ID: item['ID'],
-  //       Name: item['Name'],
-  //       Decription: item['Decription'],
-  //       imageData: item['imageData'],
-  //     ));
-  //   }
-  //
-  //   return books;
-  // }
 }

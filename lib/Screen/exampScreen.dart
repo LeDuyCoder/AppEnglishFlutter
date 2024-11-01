@@ -13,6 +13,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Widgets/WidgetsAlertExamText/alertRight.dart';
 
@@ -40,7 +41,7 @@ class _exampScreen extends State<exampScreen>{
   final TextEditingController _textEditingController = TextEditingController();
 
   Future<void> updateData() async {
-    await DataBaseHelper().updateData(widget.success, FirebaseAuth.instance, "family");
+    await DataBaseHelper().updateData(widget.success, FirebaseAuth.instance, widget.topic);
   }
 
 
@@ -50,15 +51,17 @@ class _exampScreen extends State<exampScreen>{
     LoadData();
   }
 
-  void hanldAnwser(String txtWord){
+  /// handle answer of user
+  void handleAnswser(String txtWord){
     if(txtWord == widget.word!.word){
-      alearRightText(txtWord, widget.word!);
+      alertRightText(txtWord, widget.word!);
     }else{
       alertWrongText(txtWord, widget.word!);
     }
   }
 
-  void alearRightText(String wordAnswer, Word word){
+  /// alert when user answer right
+  void alertRightText(String wordAnswer, Word word){
     AwesomeDialog(
         dismissOnTouchOutside: false,
         headerAnimationLoop: false,
@@ -91,6 +94,7 @@ class _exampScreen extends State<exampScreen>{
     ).show();
   }
 
+  /// alert when user answer wrong
   void alertWrongText(String wordAnwser, Word word){
     AwesomeDialog(
         dismissOnTouchOutside: false,
@@ -112,16 +116,25 @@ class _exampScreen extends State<exampScreen>{
     ).show();
   }
 
-  Future<void> hanldUpdateData() async{
-    if(widget.statuse) {
+  /// update data in hive
+  Future<void> hanldUpdateData() async {
+    if (!widget.statuse) {
       await updateData();
+    } else {
+      SharedPreferences dataStore = await SharedPreferences.getInstance();
+      dataStore.setInt(
+          "${FirebaseAuth.instance.currentUser!.uid}.time.${widget.topic}",
+          Timestamp
+              .now()
+              .seconds);
+      Navigator.pop(context);
+      Navigator.of(context).push(
+          MaterialPageRoute(builder: (ctx) => Cagratulate()));
     }
-    await ReadHive().writeTime((await ReadHive().getHivePath()), "haveVocabulary", FirebaseAuth.instance, widget.topic);
-    Navigator.pop(context);
-    Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => Cagratulate()));
   }
 
 
+  ///random word to check
   Word? randomWordCheck() {
     if(widget.timeCheck >= 1){
       List<String> _dataWordRandom = [];
@@ -244,7 +257,7 @@ class _exampScreen extends State<exampScreen>{
                       },
                     ),
                     suffixIcon: IconButton(onPressed: (){
-                      hanldAnwser(_textEditingController.text);
+                      handleAnswser(_textEditingController.text);
                     }, icon: Icon(Icons.send, color: Colors.blue,)
                     ),
                     hintText: "enter your anwsers",

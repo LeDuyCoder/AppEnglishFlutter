@@ -77,7 +77,7 @@ class CardVocabulary extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                     child: Image.network(
                       DataSet.linkImage,
-                      height: 150,
+                      height: 250,
                       width: double.infinity,
                       fit: BoxFit.cover, // Điều chỉnh phù hợp với kích thước của hình ảnh
                       errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {

@@ -9,8 +9,6 @@ import 'package:rive/rive.dart';
 class Cagratulate extends StatefulWidget{
   @override
   State<StatefulWidget> createState() => _Cagratulate();
-  
-  
 }
 
 class _Cagratulate extends State<Cagratulate>{
@@ -34,7 +32,7 @@ class _Cagratulate extends State<Cagratulate>{
                   fit: BoxFit.scaleDown,
                 ),
               ),
-              Text("Congratulate !", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 35),),
+              const Text("Congratulate !", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 35),),
               const Text("You have some word up memory"),
               Expanded(
                 child: Column(
@@ -47,16 +45,16 @@ class _Cagratulate extends State<Cagratulate>{
                             Navigator.of(context).pop();
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Color.fromRGBO(0, 42, 160, 1.0), // Màu nền của nút
+                            backgroundColor: Color.fromRGBO(0, 42, 160, 1.0), // button's color
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(50), // Đặt góc bo tròn
+                              borderRadius: BorderRadius.circular(50), // set border
                             ),
                             padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
-                          child: Row(
+                          child: const Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Text('Sign Up', style: TextStyle(color: Colors.white),),
+                              Text('Come Back', style: TextStyle(color: Colors.white),),
                               SizedBox(width: 10,),
                               Icon(Icons.logout, color: Colors.white,)
                             ],

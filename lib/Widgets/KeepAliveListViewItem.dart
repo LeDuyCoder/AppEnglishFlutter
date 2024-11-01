@@ -68,12 +68,16 @@ class _KeepAliveListViewItemState extends State<KeepAliveListViewItem> with Auto
   Widget build(BuildContext context) {
     super.build(context);
     return Container(
-      height: 150,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
+      height: MediaQuery.sizeOf(context).height,
+      child: GridView.builder(
         itemCount: widget.snapshot.data!.size + 1,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2, // 2 cột
+        crossAxisSpacing: 10, // Khoảng cách giữa các cột
+        mainAxisSpacing: 10, // Khoảng cách giữa các hàng
+        childAspectRatio: 4 / 4, // Tỉ lệ khung của mỗi phần tử
+        ),
         itemBuilder: (BuildContext context, int index) {
-
           return index < widget.snapshot.data!.size ? FutureBuilder<int>(
             future: _fetchAmount(widget.snapshot.data!.docs[index].reference.collection('listVocabulary')),
             builder: (BuildContext context, AsyncSnapshot<int> amountSnapshot) {
@@ -132,7 +136,7 @@ class _KeepAliveListViewItemState extends State<KeepAliveListViewItem> with Auto
 
                             List<String> dataVocabularyhaveLearn = await ReadHive().readDataLearnedTopic((await ReadHive().getHivePath()), "haveVocabulary", FirebaseAuth.instance, widget.snapshot.data!.docs[index].id);
                             Navigator.of(context).push(
-                              MaterialPageRoute(builder: (context) => vocabularyScreen(nameSet: widget.snapshot.data!.docs[index].id.replaceAll("_", " "), ListDataWord: ListWordVocabulary, Progress: double.parse(progress.toStringAsFixed(2)), ListVocabularyhaveLearn: dataVocabularyhaveLearn,))
+                                MaterialPageRoute(builder: (context) => vocabularyScreen(nameSet: widget.snapshot.data!.docs[index].id.replaceAll("_", " "), ListDataWord: ListWordVocabulary, Progress: double.parse(progress.toStringAsFixed(2)), ListVocabularyhaveLearn: dataVocabularyhaveLearn,))
                             );
                           },
                         )
@@ -169,8 +173,8 @@ class _KeepAliveListViewItemState extends State<KeepAliveListViewItem> with Auto
                 ) : Center();
               }
           );
-        },
-      ),
+        }
+      )
     );
   }
 

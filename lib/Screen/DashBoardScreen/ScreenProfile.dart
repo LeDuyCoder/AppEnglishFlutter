@@ -1,9 +1,6 @@
-import 'dart:ffi';
-
 import 'package:appenglish/Screen/DashBoardScreen/QrScreen.dart';
 import 'package:appenglish/Screen/dasboardScreen.dart';
-import 'package:appenglish/Screen/listFriendScreen.dart';
-import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:appenglish/Screen/informationProfileScreen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -21,6 +18,9 @@ class ScreenProfile extends StatefulWidget{
 }
 
 class _ScreenProfile extends State<ScreenProfile>{
+
+  int timeReStore_Second = 300;
+
   
   Future<Map<String, dynamic>?> getDataUser(String TokenUID) async{
     FirebaseFirestore dataFiresStore = FirebaseFirestore.instance;
@@ -81,7 +81,7 @@ class _ScreenProfile extends State<ScreenProfile>{
         }else if (hours > 0) {
           result += '${hours}h ${minutes}m';
         }else if (minutes > 0) {
-          result += '${minutes}h ${seconds}s';
+          result += '${minutes}m ${seconds}s';
         }else {
           result += '${seconds}s';
         }
@@ -98,9 +98,31 @@ class _ScreenProfile extends State<ScreenProfile>{
       }
 
 
-      Stream<int> timeStream(){
-        return Stream.periodic(Duration(seconds: 1), (_) => dasboardScreen.time_online);
+      void setNewTime() async {
+        FirebaseFirestore dataFiresStore = FirebaseFirestore.instance;
+        await dataFiresStore
+            .collection("users")
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .collection("dataAccount")
+            .doc("data")
+            .update({
+          "time": dasboardScreen.time_online
+        });
+      };
+
+      Stream<int> timeStream() {
+        return Stream.periodic(Duration(seconds: 1), (_) {
+          timeReStore_Second -= 1;
+          if(timeReStore_Second <= 0){
+            setNewTime();
+            timeReStore_Second = 300;
+          }
+
+          int timeOnline = dasboardScreen.time_online;
+          return timeOnline;
+        });
       }
+
 
       List<List<int>> hanldeBackgroundCard(int time){
         if(time >= 0 && time < 1296000){
@@ -287,10 +309,11 @@ class _ScreenProfile extends State<ScreenProfile>{
                                 Padding(
                                   padding: EdgeInsets.only(left: 10, right: 10),
                                   child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       GestureDetector(
                                         onTap: (){
-                                          Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => listFriendScreen()));
+                                          Navigator.push(context, MaterialPageRoute(builder: (context) => informationProfileScreen()));
                                         },
                                         child: Container(
                                           decoration: BoxDecoration(
@@ -316,45 +339,17 @@ class _ScreenProfile extends State<ScreenProfile>{
                                             ],
                                           ),
                                           height: 60,
-                                          width: (MediaQuery.of(context).size.width - (MediaQuery.of(context).size.width*0.25)) - 10,
+                                          width: MediaQuery.of(context).size.width - 50,
                                           child: const Row(
                                             mainAxisAlignment: MainAxisAlignment.center,
                                             children: [
-                                              Icon(Icons.people_alt, color: Color.fromRGBO(0, 209, 255, 1.0),),
+                                              Icon(Icons.settings, color: Colors.grey, size: 35,),
                                               SizedBox(width: 10,),
-                                              Text("List Friends", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color.fromRGBO(0, 209, 255, 1.0)),),
+                                              Text("Setting", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.grey),),
                                             ],
                                           ),
                                         ),
                                       ),
-                                      const SizedBox(width: 10,),
-                                      Container(
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          border: Border.all(
-                                            color: Colors.grey.withOpacity(0.6), // Màu của đường viền
-                                            width: 0.5, // Độ dày của đường viền
-                                          ),
-                                          borderRadius: BorderRadius.circular(15.0),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.grey.withOpacity(0.6), // Màu của bóng đổ
-                                              spreadRadius: 2, // Bán kính lan rộng của bóng đổ
-                                              blurRadius: 2, // Độ mờ của bóng đổ
-                                              offset: Offset(-1, 1), // Độ lệch của bóng đổ theo chiều dọc
-                                            ),
-                                            BoxShadow(
-                                              color: Colors.grey.withOpacity(1), // Màu của bóng đổ
-                                              spreadRadius: 2, // Bán kính lan rộng của bóng đổ
-                                              blurRadius: 1, // Độ mờ của bóng đổ
-                                              offset: Offset(-2, 3), // Độ lệch của bóng đổ theo chiều dọc
-                                            ),
-                                          ],
-                                        ),
-                                        height: 60,
-                                        width: (MediaQuery.of(context).size.width - (MediaQuery.of(context).size.width*0.85)),
-                                        child: Icon(Icons.settings, color: Colors.grey, size: 35,),
-                                      )
                                     ],
                                   ),
                                 )
@@ -379,7 +374,7 @@ class _ScreenProfile extends State<ScreenProfile>{
                           ),
                           child: StreamBuilder(stream: timeStream(), builder: (ctx, dataStream){
                             if(dataStream.connectionState == ConnectionState.waiting){
-                              return Center(
+                              return const Center(
                                 child: CircularProgressIndicator(color: Colors.blue,),
                               );
                             }

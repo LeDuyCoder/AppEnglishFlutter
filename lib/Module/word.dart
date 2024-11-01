@@ -37,7 +37,7 @@ Typeword convertStringToEnum(String str) {
     case 'phrasal_verb':
       return Typeword.phrasal_verb;
     default:
-      return Typeword.undefined; // Hoặc bạn có thể chọn một giá trị mặc định khác nếu cần
+      return Typeword.undefined;
   }
 }
 

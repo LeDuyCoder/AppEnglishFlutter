@@ -33,11 +33,9 @@ class _registerScreen extends State<registerScreen>{
   }
 
   void regAccount() async{
-
     var db = FirebaseFirestore.instance;
-
     String createID(int number) {
-      String formattedNumber = number.toString().padLeft(6, '0'); // Đảm bảo rằng số có ít nhất 6 chữ số, ví dụ: 000032
+      String formattedNumber = number.toString().padLeft(6, '0');
       return "#$formattedNumber";
     }
 
@@ -48,18 +46,18 @@ class _registerScreen extends State<registerScreen>{
           final UserCredential account = await _firebase.createUserWithEmailAndPassword(email: _email, password: _pass);
 
           QuerySnapshot users = await db.collection("users").get();
-          var amountUser = users.size;
+          var amountUser = users.docs.length;
 
           db.collection("users").doc(account.user!.uid).collection("dataAccount").doc("data").set(
             {
-              "urlImage": null,
               "name": "User${createID(amountUser+1)}",
               "title": "newbie",
               "email": _email,
               "vip": false,
               "amount_vocabulary_list": 0,
-              'limit_vocabulary': 1,
-              'list_friend': <String>[]
+              'limit_vocabulary': 100,
+              'list_friend': <String>[],
+              'time': 0
             }
           );
 
@@ -147,7 +145,7 @@ class _registerScreen extends State<registerScreen>{
                               widget.isSeePass = !widget.isSeePass;
                             });
                           },
-                        )// Label sẽ luôn hiển thị ở trên khi TextField được focus
+                        )//
                     ),
                     validator: (value){
                       if(value!.trim().isEmpty){
@@ -168,7 +166,7 @@ class _registerScreen extends State<registerScreen>{
                       labelText: 'Re-Password',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(50),
-                      ), // Label sẽ luôn hiển thị ở trên khi TextField được focus
+                      ),
                     ),
                     validator: (value){
                       if(value!.trim().isEmpty){
@@ -189,9 +187,9 @@ class _registerScreen extends State<registerScreen>{
                     regAccount();
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromRGBO(0, 42, 160, 1.0), // Màu nền của nút
+                    backgroundColor: const Color.fromRGBO(0, 42, 160, 1.0),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(50), // Đặt góc bo tròn
+                      borderRadius: BorderRadius.circular(50),
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 56, vertical: 12),
                   ),

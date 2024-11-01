@@ -40,8 +40,7 @@ class _ScreenEdit extends State<ScreenEdit>{
         ),
         body: Column(
           children: [
-            //const Text("Update data vocabulary", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
-            SizedBox(height: 50,),
+            const SizedBox(height: 50,),
             Padding(
               padding: EdgeInsets.only(left: 10, right: 10),
               child: Container(
@@ -85,7 +84,7 @@ class _ScreenEdit extends State<ScreenEdit>{
                               ),
                               validator: (value) {
                                 if (value!.trim().isEmpty) {
-                                  return "world not null";
+                                  return "word not null";
                                 }
 
                                 if (widget.elementWorld.word != value) {
@@ -102,11 +101,11 @@ class _ScreenEdit extends State<ScreenEdit>{
                                   decoration: InputDecoration(
                                     suffixIcon: Icon(Icons.volume_up),
                                     hintText: "phonicUS",
-                                    border: OutlineInputBorder( // Border cho TextFormField
-                                      borderRadius: BorderRadius.circular(8.0), // Điều chỉnh độ cong của border
-                                      borderSide: BorderSide(color: Colors.grey), // Màu và độ rộng của border
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      borderSide: const BorderSide(color: Colors.grey),
                                     ),
-                                    contentPadding: EdgeInsets.only(left: 10, bottom: 10), // Padding bên trong TextFormField
+                                    contentPadding: const EdgeInsets.only(left: 10, bottom: 10),
                                   ),
                                   validator: (value){
                                     if(value!.trim().isEmpty){
@@ -121,15 +120,14 @@ class _ScreenEdit extends State<ScreenEdit>{
                                 const SizedBox(width: 10),
                                 Expanded(child: TextFormField(
                                   initialValue: widget.elementWorld.phonicUK,
-                                  // Dữ liệu ban đầu của TextFormField
                                   decoration: InputDecoration(
                                     suffixIcon: Icon(Icons.volume_up),
                                     hintText: "phonicUK",
-                                    border: OutlineInputBorder( // Border cho TextFormField
-                                      borderRadius: BorderRadius.circular(8.0), // Điều chỉnh độ cong của border
-                                      borderSide: BorderSide(color: Colors.grey), // Màu và độ rộng của border
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      borderSide: const BorderSide(color: Colors.grey),
                                     ),
-                                    contentPadding: EdgeInsets.only(left: 10, bottom: 10), // Padding bên trong TextFormField
+                                    contentPadding: const EdgeInsets.only(left: 10, bottom: 10),
                                   ),
                                   validator: (value){
                                     if(value!.trim().isEmpty){
@@ -146,14 +144,13 @@ class _ScreenEdit extends State<ScreenEdit>{
                             SizedBox(height: 10,),
                             TextFormField(
                               initialValue: widget.elementWorld.means,
-                              // Dữ liệu ban đầu của TextFormField
                               decoration: InputDecoration(
                                 hintText: "means",
-                                border: OutlineInputBorder( // Border cho TextFormField
-                                  borderRadius: BorderRadius.circular(8.0), // Điều chỉnh độ cong của border
-                                  borderSide: BorderSide(color: Colors.grey), // Màu và độ rộng của border
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  borderSide: const BorderSide(color: Colors.grey),
                                 ),
-                                contentPadding: EdgeInsets.only(left: 10, bottom: 10), // Padding bên trong TextFormField
+                                contentPadding: const EdgeInsets.only(left: 10, bottom: 10),
                               ),
                               validator: (value){
                                 if(value!.trim().isEmpty){
@@ -168,14 +165,13 @@ class _ScreenEdit extends State<ScreenEdit>{
                             SizedBox(height: 10,),
                             TextFormField(
                               initialValue: widget.elementWorld.example,
-                              // Dữ liệu ban đầu của TextFormField
                               decoration: InputDecoration(
                                 hintText: "example",
-                                border: OutlineInputBorder( // Border cho TextFormField
-                                  borderRadius: BorderRadius.circular(8.0), // Điều chỉnh độ cong của border
-                                  borderSide: BorderSide(color: Colors.grey), // Màu và độ rộng của border
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  borderSide: const BorderSide(color: Colors.grey),
                                 ),
-                                contentPadding: EdgeInsets.only(left: 10, bottom: 10), // Padding bên trong TextFormField
+                                contentPadding: const EdgeInsets.only(left: 10, bottom: 10),
                               ),
                               validator: (value){
                                 if(value!.trim().isEmpty){
@@ -185,6 +181,7 @@ class _ScreenEdit extends State<ScreenEdit>{
                                 if(widget.elementWorld.example != value){
                                   _example = value;
                                 }
+                                return null;
                               },
                             ),
                           ],
@@ -194,7 +191,7 @@ class _ScreenEdit extends State<ScreenEdit>{
                 ),
               ),
             ),
-            SizedBox(height: 50,),
+            const SizedBox(height: 50,),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -213,10 +210,9 @@ class _ScreenEdit extends State<ScreenEdit>{
                     ).show();
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromRGBO(178, 0, 0, 1.0), // Màu nền của nút
+                    backgroundColor: const Color.fromRGBO(178, 0, 0, 1.0),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
-                      // Đặt góc bo tròn
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 56, vertical: 12),
                   ),
@@ -245,9 +241,9 @@ class _ScreenEdit extends State<ScreenEdit>{
 
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromRGBO(0, 169, 53, 1.0), // Màu nền của nút
+                    backgroundColor: const Color.fromRGBO(0, 169, 53, 1.0),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10), // Đặt góc bo tròn
+                      borderRadius: BorderRadius.circular(10),
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 56, vertical: 12),
                   ),

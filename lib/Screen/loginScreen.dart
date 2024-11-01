@@ -41,15 +41,13 @@ class _loginScreen extends State<loginScreen>{
     ];
 
     GoogleSignIn _googleSignIn = GoogleSignIn(
-      // Optional clientId
-      // clientId: 'your-client_id.apps.googleusercontent.com',
       scopes: scopes,
     );
 
     try {
       await _googleSignIn.signIn();
     } catch (error) {
-      print('Đăng nhập thất bại: $error');
+      print('login failed: $error');
 
     }
   }
@@ -69,7 +67,7 @@ class _loginScreen extends State<loginScreen>{
           }
         }
         else{
-          print("check lỗi đăng nhập thất bài");
+          print("check error login failed");
         }
       }on FirebaseAuthException catch(e){
         print(e.code);
@@ -148,12 +146,12 @@ class _loginScreen extends State<loginScreen>{
         child: Column(
           children: [
             Container(
-              height: MediaQuery.of(context).size.height/2.5, // Chiều cao là 1/4 màn hình
-              width: double.infinity, // Chiều rộng full màn hình
+              height: MediaQuery.of(context).size.height/2.5,
+              width: double.infinity,
               decoration: const BoxDecoration(
-                color: Color.fromRGBO(0, 42, 160, 1.0), // Màu nền của hình chữ nhật
+                color: Color.fromRGBO(0, 42, 160, 1.0),
                 borderRadius: BorderRadius.only(
-                  bottomRight: Radius.circular(50.0), // Bo góc trái trên
+                  bottomRight: Radius.circular(50.0),
                 ),
               ),
               child: Column(
@@ -170,11 +168,11 @@ class _loginScreen extends State<loginScreen>{
                             child: TextFormField(
                               style: const TextStyle(color: Colors.white),
                               decoration: const InputDecoration(
-                                labelText: 'Email', // Lời nhắc hiển thị khi không có focus
+                                labelText: 'Email',
                                 labelStyle: TextStyle(color: Colors.white),
                                 prefixIcon: Icon(Icons.mail, color: Colors.white,),
                                 border: UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.white), // Màu của đường gạch chân
+                                  borderSide: BorderSide(color: Colors.white),
                                 ),
                               ),
                               validator: (value){
@@ -194,10 +192,10 @@ class _loginScreen extends State<loginScreen>{
                               obscureText: widget.isSeePass,
                               style:  const TextStyle(color: Colors.white),
                               decoration: InputDecoration(
-                                labelText: 'Password', // Lời nhắc hiển thị khi không có focus
+                                labelText: 'Password',
                                 labelStyle: const TextStyle(color: Colors.white),
                                 prefixIcon: const Icon(Icons.key, color: Colors.white,),
-                                suffixIcon: IconButton( // Nút bấm bên phải
+                                suffixIcon: IconButton(
                                   icon: Icon(widget.isSeePass == false ? Icons.visibility : Icons.visibility_off, color: Colors.white,), // Icon của nút bấm
                                   onPressed: (){
                                     setState(() {
@@ -206,7 +204,7 @@ class _loginScreen extends State<loginScreen>{
                                   },
                                 ),
                                 border: const UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.white), // Màu của đường gạch chân
+                                  borderSide: BorderSide(color: Colors.white),
                                 ),
                               ),
                               validator: (value){
@@ -227,9 +225,9 @@ class _loginScreen extends State<loginScreen>{
                               login();
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue, // Màu nền của nút
+                              backgroundColor: Colors.blue,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(50), // Đặt góc bo tròn
+                                borderRadius: BorderRadius.circular(50),
                               ),
                               padding: const EdgeInsets.symmetric(horizontal: 56, vertical: 12),
                             ),
@@ -247,29 +245,28 @@ class _loginScreen extends State<loginScreen>{
             const SizedBox(height: 30,),
             GestureDetector(
               onTap: () {
-                //showGoogleSignInDialog(context);
                 showSnackBarError("Poor don't have money to update");
               },
               child: Container(
-                width: 50, // Chiều rộng của button
-                height: 50, // Chiều cao của button
+                width: 50,
+                height: 50,
                 decoration: BoxDecoration(
-                  color: Colors.white, // Màu nền của button
-                  borderRadius: BorderRadius.circular(10), // Đặt góc bo tròn
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withOpacity(0.5), // Màu của bóng đổ
-                      spreadRadius: 5, // Bán kính lan rộng của bóng đổ
-                      blurRadius: 7, // Độ mờ của bóng đổ
-                      offset: Offset(0, 3), // Độ lệch của bóng đổ theo chiều dọc
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 5,
+                      blurRadius: 7,
+                      offset: Offset(0, 3),
                     ),
                   ],
                 ),
                 child: Center(
                   child: Image.asset(
                     'assets/images/googleicon.png',
-                    width: 30, // Chiều rộng của hình ảnh
-                    height: 30, // Chiều cao của hình ảnh
+                    width: 30,
+                    height: 30,
                   ),
                 ),
               ),
@@ -280,9 +277,9 @@ class _loginScreen extends State<loginScreen>{
                 Navigator.push(context, MaterialPageRoute(builder: (ctx) => registerScreen()));
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color.fromRGBO(0, 42, 160, 1.0), // Màu nền của nút
+                backgroundColor: Color.fromRGBO(0, 42, 160, 1.0),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(50), // Đặt góc bo tròn
+                  borderRadius: BorderRadius.circular(50),
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 56, vertical: 12),
               ),

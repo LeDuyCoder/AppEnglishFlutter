@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:appenglish/Module/DataBaseHelper.dart';
-import 'package:appenglish/Module/meanWord.dart';
+import 'package:appenglish/Module/handleDataWord.dart';
 import 'package:appenglish/Module/word.dart';
 import 'package:appenglish/Widgets/tableSet.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
@@ -13,11 +13,8 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:hive/hive.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
-import 'package:hive/hive.dart';
-import 'package:path_provider/path_provider.dart' as path_provider;
 
 
 enum statusAddVoca  {
@@ -33,15 +30,15 @@ class addVocabulary extends StatefulWidget{
   final authentical = FirebaseAuth.instance;
   final db = DataBaseHelper();
   var localStorehive = null;
-
   var linkImages = null;
   var name_vocabulary = null;
   var StringListWord = "";
-  List<Word> listWord = [];
   var wordNew = "";
   var isLoading = false;
   var amount = 0;
   var linkURLImages = "";
+  List<Word> listWord = [];
+
 }
 
 class _addVocabulary extends State<addVocabulary>{
@@ -51,12 +48,11 @@ class _addVocabulary extends State<addVocabulary>{
 
   Completer<bool> completer = Completer<bool>();
 
-  @override
-
+  ///handle image user chose
   void updateImages() async {
     try {
       final pickedFile = await ImagePicker().pickImage(
-        source: ImageSource.gallery, // Chọn từ thư viện ảnh của thiết bị
+        source: ImageSource.gallery, // chose image form libary from device
       );
 
       if (pickedFile != null) {
@@ -64,54 +60,19 @@ class _addVocabulary extends State<addVocabulary>{
         setState(() {
           widget.linkImages = filePath;
         });
-        // Xử lý tệp hình ảnh đã chọn ở đây
+        // handle image has chosen
       }
     } catch (e) {
-      print('Lỗi: $e');
+      print('Error: $e');
     }
   }
 
-  meanWord? hanldTypeword(Map<String, dynamic> value){
-    for(var type in value.keys){
-      for(var time in value[type]){
-        if((time as Map).containsKey("example")){
-          return meanWord(definition: (time as Map)["definition"], example: (time as Map)["example"], type: type);
-        }
-      }
-    }
-
-    var test = meanWord(definition: ((value[(value.keys).first] as List)[0] as Map)["definition"], example: "", type: value.keys.first);
-    return test;
-  }
-
+  /// check Enum type word
   bool isInEnum(String value) {
     return Typeword.values.map((e) => e.toString().split('.').last).contains(value);
   }
 
-  Typeword getEnumValue(String name) {
-    for (var enumValue in Typeword.values) {
-      if (enumValue.toString().split('.').last == name) {
-        return enumValue;
-      }
-    }
-    throw Exception("Không tìm thấy giá trị enum cho chuỗi '$name'");
-  }
-
-
-  Future<String> createExampleWord(String word) async {
-    try {
-      final response = await http.get(Uri.parse('https://api.urbandictionary.com/v0/define?term=${word}'));
-      if (response.statusCode == 200) {
-        var data = json.decode(response.body);
-        return ((data["list"] as List)[3] as Map)["example"];
-      } else {
-        return "";
-      }
-    } catch (error) {
-      return "error";
-    }
-  }
-
+  ///add data word to listWord
   Future<void> addDataPhrasalPerb(data) async {
     widget.listWord.add(
         Word(
@@ -127,46 +88,16 @@ class _addVocabulary extends State<addVocabulary>{
     );
   }
 
+
+  ///add data word to listWord
   void addData(data, String word) async {
     print(word);
     widget.listWord.add(
-        ((data[0] as Map)["phonetics"] as List).length <= 2 ? Word(
-            word: word,
-            type: getEnumValue(
-                hanldTypeword((data[0] as Map)["meaning"])!.type),
-            linkUK: (data[0] as Map)["phonetics"][0]["audio"],
-            linkUS: ((data[0] as Map)["phonetics"] as List).length == 2
-                ? (data[0] as Map)["phonetics"][1]["audio"]
-                : (data[0] as Map)["phonetics"][0]["audio"],
-            phonicUK: (data[0] as Map)["phonetics"][0]["text"],
-            phonicUS: ((data[0] as Map)["phonetics"] as List).length == 2
-                ? (data[0] as Map)["phonetics"][1]["text"]
-                : (data[0] as Map)["phonetics"][0]["text"],
-            means: hanldTypeword((data[0] as Map)["meaning"]) != null
-                ? hanldTypeword((data[0] as Map)["meaning"])!.definition
-                : "",
-            example: hanldTypeword((data[0] as Map)["meaning"]) != null
-                ? hanldTypeword((data[0] as Map)["meaning"])!.example
-                : (await createExampleWord(word))
-        ) : Word(
-            word: word,
-            type: getEnumValue(
-                hanldTypeword((data[0] as Map)["meaning"])!.type),
-            linkUK: (data[0] as Map)["phonetics"][1]["audio"],
-            linkUS: (data[0] as Map)["phonetics"][2]["audio"],
-            phonicUK: (data[0] as Map)["phonetics"][1]["text"],
-            phonicUS: (data[0] as Map)["phonetics"][2]["text"],
-            means: hanldTypeword((data[0] as Map)["meaning"]) != null
-                ? hanldTypeword((data[0] as Map)["meaning"])!.definition
-                : "",
-            example: hanldTypeword((data[0] as Map)["meaning"]) != null
-                ? hanldTypeword((data[0] as Map)["meaning"])!.example
-                : (await createExampleWord(word))
-        )
+        await handleDataWord().getWord(data, word)
     );
-
   }
 
+  /// push word's data to firebase
   void updateVocabularyToFirebase(){
     widget.listWord.forEach((element) {
       dbStore.collection("users").doc(widget.authentical.currentUser!.uid).collection("VocabularyData").doc(widget.name_vocabulary).collection("listVocabulary").doc(element.word).set(
@@ -244,6 +175,7 @@ class _addVocabulary extends State<addVocabulary>{
     return completer.future;
   }
 
+  /// function to count amount word
   int countNonSpaceWords(String input) {
     List<String> words = input.split(" ");
     int nonSpaceWordCount = 0;
@@ -256,6 +188,7 @@ class _addVocabulary extends State<addVocabulary>{
     return nonSpaceWordCount;
   }
 
+  /// call api to get data word
   Future<bool> callAPI(String word) async {
     if(countNonSpaceWords(word) >= 2){
       try {
@@ -311,15 +244,9 @@ class _addVocabulary extends State<addVocabulary>{
         return false;
       }
     }
-
-
   }
 
-
-  void onCallback(bool success) {
-    completer.complete(success);
-  }
-
+  /// handle data word user input
   void hanldWord(String valueText) async {
     var listWord = valueText.split("\n");
     bool allCallsSuccessful = false;
@@ -330,12 +257,7 @@ class _addVocabulary extends State<addVocabulary>{
         continue;
       }
     }
-
-
     if (allCallsSuccessful) {
-      //await widget.db.insetDataVocabulary(widget.listWord, widget.name_vocabulary);
-      //updateVocabularyToFirebase();
-
       DocumentReference docRef = FirebaseFirestore.instance.collection('users').doc(widget.authentical.currentUser!.uid).collection("dataAccount").doc("data");
       DocumentSnapshot docSnapshot = await docRef.get();
       if (docSnapshot.exists) {
@@ -371,25 +293,11 @@ class _addVocabulary extends State<addVocabulary>{
           Navigator.of(context).pop();
         },
       ).show();
-
-
-
-      // AwesomeDialog(
-      //   dismissOnTouchOutside: false,
-      //   context: context,
-      //   dialogType: DialogType.success,
-      //   animType: AnimType.scale,
-      //   title: 'Success',
-      //   btnOkOnPress: () {
-      //     setState(() {
-      //       widget.isLoading = false;
-      //     });
-      //     Navigator.of(context).pop();
-      //   },
-      // ).show();
     }
   }
 
+
+  ///check special characters
   bool containsSpecialCharacters(String input) {
     RegExp specialCharRegex = RegExp(r'[^\w\s]');
     return specialCharRegex.hasMatch(input);

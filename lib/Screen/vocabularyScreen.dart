@@ -9,6 +9,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:rive/rive.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Module/word.dart';
 import '../Widgets/barChart.dart';
@@ -51,25 +52,18 @@ class _vocabularyScreen extends State<vocabularyScreen>{
     switch(Level){
       case 0:
         return Colors.red;
-        break;
       case 1:
         return Colors.orange;
-        break;
       case 2:
         return Colors.yellow;
-        break;
       case 3:
         return Colors.greenAccent;
-        break;
       case 4:
         return Colors.green;
-        break;
       case 5:
         return Colors.blue;
-        break;
       case 6:
         return Colors.blueAccent;
-        break;
       default:
         return Colors.white;
     }
@@ -89,20 +83,20 @@ class _vocabularyScreen extends State<vocabularyScreen>{
               child: Container(
                 height: 180,
                 decoration: BoxDecoration(
-                  color: Colors.white, // Màu nền của button
-                  borderRadius: BorderRadius.circular(10), // Đặt góc bo tròn
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withOpacity(0.5), // Màu của bóng đổ
-                      spreadRadius: 0, // Bán kính lan rộng của bóng đổ
-                      blurRadius: 1, // Độ mờ của bóng đổ
-                      offset: const Offset(2, 3), // Độ lệch của bóng đổ theo chiều dọc
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 0, 
+                      blurRadius: 1, 
+                      offset: const Offset(2, 3), 
                     ),
                     BoxShadow(
-                      color: Colors.grey.withOpacity(0.5), // Màu của bóng đổ
-                      spreadRadius: 0, // Bán kính lan rộng của bóng đổ
-                      blurRadius: 1, // Độ mờ của bóng đổ
-                      offset: const Offset(-2, -3), // Độ lệch của bóng đổ theo chiều dọc
+                      color: Colors.grey.withOpacity(0.5), 
+                      spreadRadius: 0, 
+                      blurRadius: 1, 
+                      offset: const Offset(-2, -3), 
                     ),
                   ],
                 ),
@@ -160,7 +154,7 @@ class _vocabularyScreen extends State<vocabularyScreen>{
                                   Padding(
                                     padding: EdgeInsets.only(right: 10),
                                     child: IconButton(
-                                      icon: widget.ListVocabularyhaveLearn.contains(((widget.ListDataWord[index] as Map)["word"] as Word).word) ? const Icon(Icons.star, color: Colors.orange,) : const Icon(Icons.star_outline_outlined), onPressed: () {
+                                      icon: widget.ListVocabularyhaveLearn.contains(((widget.ListDataWord[index] as Map)["word"] as Word).word) ? const Icon(Icons.star, color: Colors.orange,) : const Icon(Icons.star_outline_outlined), onPressed: () async {
                                         setState(() {
                                           String _word = ((widget.ListDataWord[index] as Map)["word"] as Word).word;
                                           if(widget.ListVocabularyhaveLearn.contains(_word)){
@@ -169,6 +163,8 @@ class _vocabularyScreen extends State<vocabularyScreen>{
                                             widget.ListVocabularyhaveLearn.add(_word);
                                           }
                                         });
+
+                                        await ReadHive().writeHive((await ReadHive().getHivePath()), "haveVocabulary", FirebaseAuth.instance, widget.ListVocabularyhaveLearn, widget.nameSet);
                                       },
                                     ),
                                   )
@@ -185,11 +181,11 @@ class _vocabularyScreen extends State<vocabularyScreen>{
                               onTap: () async {
                                 await player.play(UrlSource(((widget.ListDataWord[index] as Map)["word"] as Word).linkUK), volume: 1.0);
                               },
-                              borderRadius: BorderRadius.circular(20), // Điều chỉnh độ cong của góc
+                              borderRadius: BorderRadius.circular(20), 
                               child: Ink(
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20), // Điều chỉnh độ cong của góc
-                                  color: Colors.white.withOpacity(0.1), // Màu nền khi nhấn
+                                  borderRadius: BorderRadius.circular(20), 
+                                  color: Colors.white.withOpacity(0.1), 
                                 ),
                                 child: const Padding(
                                   padding: EdgeInsets.only(left: 10),
@@ -212,11 +208,11 @@ class _vocabularyScreen extends State<vocabularyScreen>{
                               onTap: () async {
                                 await player.play(UrlSource(((widget.ListDataWord[index] as Map)["word"] as Word).linkUS), volume: 1.0);
                               },
-                              borderRadius: BorderRadius.circular(20), // Điều chỉnh độ cong của góc
+                              borderRadius: BorderRadius.circular(20), 
                               child: Ink(
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20), // Điều chỉnh độ cong của góc
-                                  color: Colors.white.withOpacity(0.1), // Màu nền khi nhấn
+                                  borderRadius: BorderRadius.circular(20), 
+                                  color: Colors.white.withOpacity(0.1), 
                                 ),
                                 child: const Padding(
                                   padding: EdgeInsets.only(left: 10),
@@ -235,12 +231,12 @@ class _vocabularyScreen extends State<vocabularyScreen>{
                         padding: const EdgeInsets.only(left: 10, right: 10, top: 5),
                         child: Text(((widget.ListDataWord[index] as Map)["word"] as Word).means),
                       ),
-                      Padding(padding: EdgeInsets.only(left: 10, right: 10, top: 10),
+                      Padding(padding: const EdgeInsets.only(left: 10, right: 10, top: 10),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("Example", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold), textAlign: TextAlign.left,),
-                            Padding(padding: EdgeInsets.only(top: 10),
+                            const Text("Example", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold), textAlign: TextAlign.left,),
+                            Padding(padding: const EdgeInsets.only(top: 10),
                               child: Text(((widget.ListDataWord[index] as Map)["word"] as Word).example),
                             )
                           ],
@@ -264,6 +260,14 @@ class _vocabularyScreen extends State<vocabularyScreen>{
     const Text("It's time for revision", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),);
   }
 
+  Future<int> getTimeSet() async {
+    SharedPreferences storeData = await SharedPreferences.getInstance();
+    int time = storeData.getInt('${FirebaseAuth.instance.currentUser!.uid}.time.${widget.nameSet}') ?? Timestamp.now().seconds;
+    return time;
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -285,17 +289,17 @@ class _vocabularyScreen extends State<vocabularyScreen>{
                 children: [
                   const SizedBox(height: 30,),
                   Container(
-                    height: 340,
+                    height: 350,
                     width: MediaQuery.of(context).size.width - 40,
                     decoration: BoxDecoration(
                       color: Colors.white, // Màu nền của button
                       borderRadius: BorderRadius.circular(10), // Đặt góc bo tròn
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.grey.withOpacity(0.5), // Màu của bóng đổ
-                          spreadRadius: 5, // Bán kính lan rộng của bóng đổ
-                          blurRadius: 7, // Độ mờ của bóng đổ
-                          offset: const Offset(0, 3), // Độ lệch của bóng đổ theo chiều dọc
+                          color: Colors.grey.withOpacity(0.5), 
+                          spreadRadius: 5, 
+                          blurRadius: 7, 
+                          offset: const Offset(0, 3), 
                         ),
                       ],
                     ),
@@ -366,10 +370,10 @@ class _vocabularyScreen extends State<vocabularyScreen>{
                       borderRadius: BorderRadius.circular(10), // Đặt góc bo tròn
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.grey.withOpacity(0.5), // Màu của bóng đổ
-                          spreadRadius: 5, // Bán kính lan rộng của bóng đổ
-                          blurRadius: 7, // Độ mờ của bóng đổ
-                          offset: const Offset(0, 3), // Độ lệch của bóng đổ theo chiều dọc
+                          color: Colors.grey.withOpacity(0.5), 
+                          spreadRadius: 5, 
+                          blurRadius: 7, 
+                          offset: const Offset(0, 3), 
                         ),
                       ],
                     ),
@@ -392,83 +396,106 @@ class _vocabularyScreen extends State<vocabularyScreen>{
                                     child: Row(
                                       children: [
                                         const Text("after  ", style: TextStyle(fontWeight: FontWeight.bold),),
-                                        StreamBuilder(stream: timeStream(), builder: (ctx, data) {
-                                          Future<int> calculateMillitime() async {
-                                            int timeSet = (await ReadHive().getAllTime(await ReadHive().getHivePath(), "haveVocabulary", FirebaseAuth.instance))[widget.nameSet]!;
-                                            int millitime = data.data!.seconds - timeSet;
-                                            return widget.timeLoad - (data.data!.seconds - timeSet);
-                                          }
 
-                                          if(data.hasData){
-                                            return FutureBuilder(future: calculateMillitime(), builder: (ctx, dataWaiting){
-                                              if(dataWaiting.hasData){
-                                                return loadDataTime(dataWaiting);
-                                              }else{
-                                                return const Text("error");
+                                        FutureBuilder(future: getTimeSet(), builder: (context, dataTimeSet){
+                                          SharedPreferences? storeData;
+                                          return StreamBuilder(stream: timeStream(), builder: (ctx, data) {
+                                            Future<int> calculateMillitime() async {
+                                              int TimeAgain = data.data!.seconds - dataTimeSet.data!;
+                                              int time = widget.timeLoad -(TimeAgain);
+
+                                              storeData ??= await SharedPreferences
+                                                    .getInstance();
+
+                                              if(!storeData!.containsKey("${FirebaseAuth.instance.currentUser!.uid}.time.${widget.nameSet}")) {
+                                                storeData!.setInt('${FirebaseAuth.instance.currentUser!.uid}.time.${widget.nameSet}', dataTimeSet.data!);
                                               }
-                                            });
-                                          }else {
-                                            return const Text("0h:0m:0s", style: TextStyle(
-                                                color: CupertinoColors.activeBlue),);
-                                          }
+
+                                              return time;
+                                            }
+
+                                            if(data.hasData){
+                                              return FutureBuilder(future: calculateMillitime(), builder: (ctx, dataWaiting){
+                                                if(dataWaiting.hasData){
+                                                  return loadDataTime(dataWaiting);
+                                                }else{
+                                                  return const Text("error");
+                                                }
+                                              });
+                                            }else {
+                                              return const Text("0h:0m:0s", style: TextStyle(
+                                                  color: CupertinoColors.activeBlue),);
+                                            }
+                                          });
                                         })
                                       ],
                                     ),
                                   ),
                                   const SizedBox(height: 20,),
-                                  StreamBuilder(stream: timeStream(), builder: (ctx, data) {
-                                    Future<int?> calculateMillitime() async {
-                                      int timeSet = (await ReadHive().getAllTime(
-                                          await ReadHive().getHivePath(), "haveVocabulary",
-                                          FirebaseAuth.instance))[widget.nameSet]!;
-                                      int millitime = data.data!.seconds - timeSet;
-                                      return widget.timeLoad - (data.data!.seconds - timeSet);
-                                    }
+                                  FutureBuilder(future: getTimeSet(), builder: (context, dataTimeSet){
+                                    return StreamBuilder(stream: timeStream(), builder: (ctx, data) {
+                                      Future<int?> calculateMillitime() async {
+                                        return widget.timeLoad - (data.data!.seconds - dataTimeSet.data!);
+                                      }
 
-                                    if(data.hasData){
-                                      return FutureBuilder(future: calculateMillitime(), builder: (ctx, dataWaiting){
-                                        if(dataWaiting.hasData){
-                                          return Container(
-                                            height: 67,
-                                            child: SingleChildScrollView(
-                                              scrollDirection: Axis.vertical,
-                                              child: ElevatedButton(
-                                                onPressed: () {
-                                                  Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => exampScreen(topic: widget.nameSet, statuse: dataWaiting.data! <= 0)));
-                                                },
-                                                style: ElevatedButton.styleFrom(
-                                                  backgroundColor: const Color.fromRGBO(0, 42, 160, 1.0), // Màu nền của nút
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius: BorderRadius.circular(10), // Đặt góc bo tròn
+                                      if(data.hasData){
+                                        return FutureBuilder(future: calculateMillitime(), builder: (ctx, dataWaiting){
+                                          if(dataWaiting.hasData){
+                                            return Container(
+                                              height: 67,
+                                              child: SingleChildScrollView(
+                                                scrollDirection: Axis.vertical,
+                                                child: ElevatedButton(
+                                                  onPressed: () {
+                                                    //SharedPreferences dataStore = await SharedPreferences.getInstance();
+                                                    //dataStore.setInt('${FirebaseAuth.instance.currentUser!.uid}.time.${widget.nameSet}', Timestamp.now().seconds);
+                                                    bool reivew = (dataWaiting.data??0)<=0;
+                                                    print(reivew);
+                                                    if(widget.ListVocabularyhaveLearn.length >= 1) {
+                                                      Navigator.of(context)
+                                                          .push(
+                                                          MaterialPageRoute(
+                                                              builder: (ctx) =>
+                                                                  exampScreen(
+                                                                      topic: widget
+                                                                          .nameSet,
+                                                                      statuse: reivew)));
+                                                    }
+                                                  },
+                                                  style: ElevatedButton.styleFrom(
+                                                    backgroundColor: const Color.fromRGBO(0, 42, 160, 1.0), // Màu nền của nút
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.circular(10), // Đặt góc bo tròn
+                                                    ),
+                                                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 5),
                                                   ),
-                                                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 5),
+                                                  child: Text(dataWaiting.data! <= 0 ? 'Review' : 'Learn New Word', style: TextStyle(color: Colors.white),),
                                                 ),
-                                                child: Text(dataWaiting.data! <= 0 ? 'Review' : 'Learn New Word', style: TextStyle(color: Colors.white),),
                                               ),
-                                            ),
-                                          );
-                                        }else{
-                                          return Container(
-                                            width: 63,
-                                            height: 63,
-                                            child: const RiveAnimation.asset(
-                                              "assets/Rive/loading.riv",
-                                              fit: BoxFit.fill,
-                                            ),
-                                          );
-                                        }
-                                      });
-                                    }else {
-                                       return Container(
-                                         width: 63,
-                                         height: 63,
+                                            );
+                                          }else{
+                                            return Container(
+                                              width: 63,
+                                              height: 63,
+                                              child: const RiveAnimation.asset(
+                                                "assets/Rive/loading.riv",
+                                                fit: BoxFit.fill,
+                                              ),
+                                            );
+                                          }
+                                        });
+                                      }else {
+                                        return Container(
+                                          width: 63,
+                                          height: 63,
                                           child: const RiveAnimation.asset(
                                             "assets/Rive/loading.riv",
                                             fit: BoxFit.scaleDown,
                                           ),
-                                       );
-                                    }
-                                  }),
+                                        );
+                                      }
+                                    });
+                                  })
 
                                 ],
                               ),

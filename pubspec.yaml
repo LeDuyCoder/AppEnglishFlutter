@@ -61,13 +61,17 @@ dependencies:
   google_nav_bar: ^5.0.6
   url_launcher: ^6.2.5
   qr_flutter: ^4.1.0
-  lifecycle: ^0.8.0
   qr_code_scanner: ^1.0.1
+  flutter_launcher_icons: ^0.14.1
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/iconapp.png"
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  lifecycle: 0.8.0
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -89,36 +93,11 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/images/iconapp.png
-    - assets/images/googleicon.png
-    - assets/images/user.jpg
-    - assets/images/user1.png
-    - assets/images/image_vocabulary.png
-    - assets/images/note.png
-    - assets/images/baner_ads_account.png
-    - assets/images/lesson.png
-    - assets/images/wrong.png
-    - assets/images/right.png
-    - assets/Rive/congratulations.riv
-    - assets/Rive/loading.riv
-    - assets/Music/success_sound.mp3
-    - assets/images/vip_account.png
-    - assets/Rive/background_vip_up.riv
-    - assets/images/avata.png
-    - assets/images/qr.png
-    - assets/images/timmer.png
-    - assets/images/ranks_ads/gods.png
-    - assets/images/ranks/leave.png
-    - assets/images/ranks/stone.png
-    - assets/images/ranks/wood.png
-    - assets/images/ranks/bronze.png
-    - assets/images/ranks/thep.png
-    - assets/images/ranks/silver.png
-    - assets/images/ranks/iron.png
-    - assets/images/ranks/gold.png
-    - assets/images/ranks/platinum.png
-    - assets/images/ranks/diamond.png
-    - assets/images/ranks/ruby.png
+    - assets/images/
+    - assets/images/ranks/
+    - assets/images/ranks_ads/
+    - assets/Music/
+    - assets/Rive/
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 
